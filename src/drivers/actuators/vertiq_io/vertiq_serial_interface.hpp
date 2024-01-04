@@ -26,7 +26,7 @@ public:
 	* @param baud
 	* @return 0 on success, <0 on error
 	*/
-	int set_baudrate(unsigned baud);
+	int configure_serial_peripheral(unsigned baud);
 
 	/**
 	* @brief check to see if there is any data for us coming in over the serial port

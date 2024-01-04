@@ -23,10 +23,10 @@ int VertiqSerialInterface::init_serial(const char *uart_device)
 
 	PX4_INFO("Opened serial port successfully");
 
-	return set_baudrate(UART_BAUDRATE);
+	return configure_serial_peripheral(UART_BAUDRATE);
 }
 
-int VertiqSerialInterface::set_baudrate(unsigned baud)
+int VertiqSerialInterface::configure_serial_peripheral(unsigned baud)
 {
 	int speed;
 
