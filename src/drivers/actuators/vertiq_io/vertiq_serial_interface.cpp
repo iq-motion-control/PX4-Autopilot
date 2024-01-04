@@ -130,10 +130,39 @@ int VertiqSerialInterface::process_serial_rx()
 
 		//While we've got packets to look at
 		while(_iquart_interface.PeekPacket(&rx_buf_ptr, &_bytes_available) == 1){
-			write(_uart_fd, _rx_buf, 7);
+
 			_iquart_interface.DropPacket();
 		}
 
+	}
+
+	return 1;
+}
+
+int VertiqSerialInterface::process_serial_tx()
+{
+	//Testing buffer -> set prop motor control velo to 100
+	// uint8_t buf[] = {85, 6, 52, 5, 1, 0, 0, 200, 66, 149, 55};
+
+	uint8_t set_velo_msg[6]; //stores subtype, access, and data (for a float 4 bytes)
+	set_velo_msg[0] = 5;
+	set_velo_msg[1] = 1;
+	float velo = 100;
+	memcpy(&(set_velo_msg[2]), &velo, sizeof(velo));
+
+	_iquart_interface.SendPacket(52, set_velo_msg, 6);
+
+	// return write(_uart_fd, buf, sizeof(buf));
+
+	//while there's stuff to write, write it
+	while(_iquart_interface.GetTxBytes(_tx_buf, _bytes_available)){
+		PX4_INFO("bytes available for transmission: %d", _bytes_available);
+
+		for(uint8_t i = 0; i < _bytes_available; i++){
+			PX4_INFO("%d", _tx_buf[i]);
+		}
+
+		write(_uart_fd, _tx_buf, _bytes_available);
 	}
 
 	return 1;
