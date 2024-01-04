@@ -22,9 +22,19 @@ class VertiqIo : public ModuleBase<VertiqIo>, public OutputModuleInterface
 
 public:
 
+	/**
+	* @brief Create a new VertiqIo object
+	*/
 	VertiqIo();
+
+	/**
+	* @brief destruct a VertiqIo object
+	*/
 	~VertiqIo() override;
 
+	/**
+	* @brief initialize the VertiqIo object. This will be called by the task_spawn function. Makes sure that the thread gets scheduled.
+	*/
 	bool init();
 
 	/** @see ModuleBase */
@@ -46,10 +56,17 @@ public:
 			   unsigned num_outputs, unsigned num_control_groups_updated) override;
 
 private:
+	//Variables and functions necessary for properly configuring the serial interface
+	//Determines whether or not we should initialize or re-initialize the serial connection
 	static px4::atomic_bool _request_telemetry_init;
+
+	//The name of the device we're connecting to. this will be something like /dev/ttyS3
 	static char _telemetry_device[20];
+
+	//We need a serial handler in order to talk over the serial port
 	VertiqSerialInterface _serial_interface;
 
+	//Counters/timers to track our status
 	perf_counter_t	_loop_perf{perf_alloc(PC_ELAPSED, MODULE_NAME": cycle")};
 	perf_counter_t	_loop_interval_perf{perf_alloc(PC_INTERVAL, MODULE_NAME": output update interval")};
 };

@@ -7,31 +7,41 @@
 #include <termios.h>
 #include <errno.h>
 
-class VertiqSerialInterface {
-	public:
+class VertiqSerialInterface
+{
+public:
 
-		int init_serial(const char *uart_device);
+	/**
+	* @brief Initialize our serial peripheral
+	*/
+	int init_serial(const char *uart_device);
 
-		/**
-		* set the Baudrate
-		* @param baud
-		* @return 0 on success, <0 on error
-		*/
-		int setBaudrate(unsigned baud);
+	/**
+	* Turn off and close the serial connection
+	*/
+	void deinit_serial();
 
-		void deinit_serial();
+	/**
+	* set the Baudrate
+	* @param baud
+	* @return 0 on success, <0 on error
+	*/
+	int set_baudrate(unsigned baud);
 
-		int updateSerial();
+	/**
+	* @brief check to see if there is any data for us coming in over the serial port
+	*/
+	int process_serial_rx();
 
-	private:
-		static constexpr int FRAME_SIZE = 10;
-		int _uart_fd{-1};
+private:
+	static constexpr int FRAME_SIZE = 10;
+	int _uart_fd{-1};
 
-		#if ! defined(__PX4_QURT)
-			struct termios		_orig_cfg;
-			struct termios		_cfg;
-		#endif
-		int   _speed = -1;
+#if ! defined(__PX4_QURT)
+	struct termios		_orig_cfg;
+	struct termios		_cfg;
+#endif
+	int   _speed = -1;
 
 };
 

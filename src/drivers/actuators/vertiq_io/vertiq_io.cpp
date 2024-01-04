@@ -21,9 +21,7 @@ VertiqIo::~VertiqIo()
 //called by our task_spawn function
 bool VertiqIo::init()
 {
-	PX4_INFO("Init function of vertiqio");
-
-	//Schedule to run every 100 ms
+	//Schedule to run every 2.5 ms
 	//calls Run() every second
 	ScheduleOnInterval(2500_us);
 
@@ -55,7 +53,7 @@ void VertiqIo::Run()
 	}
 
 	//Update our serial tx/rx
-	_serial_interface.updateSerial();
+	_serial_interface.process_serial_rx();
 
 	//stop our timer
 	perf_end(_loop_perf);
@@ -122,10 +120,13 @@ int VertiqIo::custom_command(int argc, char *argv[])
 
 		return 0;
 	}
+
 	return print_usage("unknown command");
 }
 
-bool VertiqIo::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS], unsigned num_outputs, unsigned num_control_groups_updated){
+bool VertiqIo::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS], unsigned num_outputs,
+			     unsigned num_control_groups_updated)
+{
 	return true;
 }
 

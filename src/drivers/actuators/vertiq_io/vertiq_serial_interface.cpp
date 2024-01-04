@@ -3,14 +3,16 @@
 
 #define UART_BAUDRATE 115200
 
-void VertiqSerialInterface::deinit_serial(){
+void VertiqSerialInterface::deinit_serial()
+{
 	if (_uart_fd >= 0) {
 		close(_uart_fd);
 		_uart_fd = -1;
 	}
 }
 
-int VertiqSerialInterface::init_serial(const char *uart_device){
+int VertiqSerialInterface::init_serial(const char *uart_device)
+{
 	deinit_serial();
 	_uart_fd = ::open(uart_device, O_RDWR | O_NOCTTY);
 
@@ -21,10 +23,11 @@ int VertiqSerialInterface::init_serial(const char *uart_device){
 
 	PX4_INFO("Opened serial port successfully");
 
-	return setBaudrate(UART_BAUDRATE);
+	return set_baudrate(UART_BAUDRATE);
 }
 
-int VertiqSerialInterface::setBaudrate(unsigned baud){
+int VertiqSerialInterface::set_baudrate(unsigned baud)
+{
 	int speed;
 
 	switch (baud) {
@@ -100,7 +103,8 @@ int VertiqSerialInterface::setBaudrate(unsigned baud){
 	return 0;
 }
 
-int VertiqSerialInterface::updateSerial(){
+int VertiqSerialInterface::process_serial_rx()
+{
 	if (_uart_fd < 0) {
 		return -1;
 	}
@@ -109,19 +113,21 @@ int VertiqSerialInterface::updateSerial(){
 	int bytes_available = 0;
 	int ret = ioctl(_uart_fd, FIONREAD, (unsigned long)&bytes_available);
 
-	if (ret != 0){
+	if (ret != 0) {
 		PX4_ERR("Reading error");
 		return -1;
-	}else{
+
+	} else {
 		PX4_INFO("able to check the port for data and found %d bytes of data", bytes_available);
 	}
 
-	if(bytes_available > 0){
+	if (bytes_available > 0) {
 		const int buf_length = FRAME_SIZE;
 		uint8_t buf[buf_length];
 
 		int num_read = read(_uart_fd, buf, buf_length);
-		for(uint8_t i = 0; i < num_read; i++){
+
+		for (uint8_t i = 0; i < num_read; i++) {
 			uint8_t char_to_write = buf[i];
 			write(_uart_fd, &char_to_write, 1);
 		}
