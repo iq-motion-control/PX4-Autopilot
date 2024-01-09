@@ -19,13 +19,6 @@ actuator_output:
 parameters:
     - group: Vertiq IO
       definitions:
-        VERTIQ_TEST:
-            description:
-                short: testing to see if I can get this to show
-                long: |
-                    I just want this stupid thing to stupid show up!!! grrrrr
-            type: int32
-            default: 26
         VERTIQ_ENABLE:
             description:
                 short: Enable the IQUART driver
@@ -40,3 +33,4 @@ parameters:
                     The baud rate (in bits per second) used by the serial port connected with IQUART communication
             type: int32
             default: 115200
+            reboot_required: true

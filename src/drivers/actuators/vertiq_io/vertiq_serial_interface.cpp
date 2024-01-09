@@ -1,8 +1,6 @@
 
 #include "vertiq_serial_interface.hpp"
 
-#define UART_BAUDRATE 115200
-
 VertiqSerialInterface::VertiqSerialInterface(uint8_t num_clients) :
 	_number_of_clients(num_clients)
 {}
@@ -15,7 +13,7 @@ void VertiqSerialInterface::deinit_serial()
 	}
 }
 
-int VertiqSerialInterface::init_serial(const char *uart_device)
+int VertiqSerialInterface::init_serial(const char *uart_device, unsigned baud)
 {
 	deinit_serial();
 	_uart_fd = ::open(uart_device, O_RDWR | O_NOCTTY);
@@ -27,7 +25,7 @@ int VertiqSerialInterface::init_serial(const char *uart_device)
 
 	PX4_INFO("Opened serial port successfully");
 
-	return configure_serial_peripheral(UART_BAUDRATE);
+	return configure_serial_peripheral(baud);
 }
 
 int VertiqSerialInterface::configure_serial_peripheral(unsigned baud)
@@ -46,6 +44,14 @@ int VertiqSerialInterface::configure_serial_peripheral(unsigned baud)
 	case 115200: speed = B115200; break;
 
 	case 230400: speed = B230400; break;
+
+	case 460800: speed = B460800; break;
+
+	case 500000: speed = B500000; break;
+
+	case 921600: speed = B921600; break;
+
+	case 1000000: speed = B1000000; break;
 
 	default:
 		return -EINVAL;

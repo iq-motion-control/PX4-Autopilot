@@ -51,12 +51,20 @@ void VertiqIo::Run()
 	// telemetry device update request?
 	if (_request_telemetry_init.load()) {
 		PX4_INFO("Asked for serial init");
-		_serial_interface.init_serial(_telemetry_device);
+		_serial_interface.init_serial(_telemetry_device, _param_vertiq_baud.get());
 		// init_serial(_telemetry_device);
 		_request_telemetry_init.store(false);
 	}
 
-	prop_test.ctrl_velocity_.set(*_serial_interface.get_iquart_interface(), 400);
+	int enable = _param_vertiq_enable.get();
+	PX4_INFO("enable value is %d", enable);
+
+	if(_param_vertiq_enable.get() > 0){
+		prop_test.ctrl_velocity_.set(*_serial_interface.get_iquart_interface(), 400);
+	}else{
+		prop_test.ctrl_coast_.set(*_serial_interface.get_iquart_interface());
+	}
+
 	brushless_drive_test.obs_velocity_.get(*_serial_interface.get_iquart_interface());
 
 	//Update our serial rx
@@ -65,12 +73,13 @@ void VertiqIo::Run()
 	//Update our serial tx
 	_serial_interface.process_serial_tx();
 
+	update_params();
+
 	//Read the velo we got
 	if (brushless_drive_test.obs_velocity_.IsFresh()) {
 		PX4_INFO("Got velocity response %f", (double)brushless_drive_test.obs_velocity_.get_reply());
 
 	}
-
 	//stop our timer
 	perf_end(_loop_perf);
 }
@@ -138,6 +147,11 @@ int VertiqIo::custom_command(int argc, char *argv[])
 	}
 
 	return print_usage("unknown command");
+}
+
+void VertiqIo::update_params()
+{
+	updateParams();
 }
 
 bool VertiqIo::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS], unsigned num_outputs,
