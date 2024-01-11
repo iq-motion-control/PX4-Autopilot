@@ -198,8 +198,8 @@ void VertiqIo::update_telemetry(){
 		_esc_status.esc[_current_telemetry_target_module_id].esc_power    = telem_response.voltage * telem_response.current;
 		_esc_status.esc[_current_telemetry_target_module_id].esc_state    = 0;
 		_esc_status.esc[_current_telemetry_target_module_id].esc_cmdcount = 0;
-		_esc_status.esc[_current_telemetry_target_module_id].esc_voltage  = telem_response.voltage;
-		_esc_status.esc[_current_telemetry_target_module_id].esc_current  = telem_response.current;
+		_esc_status.esc[_current_telemetry_target_module_id].esc_voltage  = telem_response.voltage * 0.01;
+		_esc_status.esc[_current_telemetry_target_module_id].esc_current  = telem_response.current * 0.01;
 		_esc_status.esc[_current_telemetry_target_module_id].failures     = 0; //not implemented
 
 		// PX4_INFO("Velo gotten from telemetry on module id %d %d", _current_telemetry_target_module_id, telem_response.speed);
