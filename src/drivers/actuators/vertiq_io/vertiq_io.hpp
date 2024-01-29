@@ -15,6 +15,7 @@
 #include <uORB/topics/esc_status.h>
 #include <uORB/topics/actuator_test.h>
 
+#include "vertiq_telemetry_manager.hpp"
 #include "vertiq_serial_interface.hpp"
 #include "ifci.hpp"
 
@@ -76,9 +77,9 @@ private:
 	*/
 	void handle_iquart();
 
-	void find_first_and_last_telemetry_positions();
-	void update_telemetry();
-	void find_next_motor_for_telemetry();
+	// void find_first_and_last_telemetry_positions();
+	// void update_telemetry();
+	// void find_next_motor_for_telemetry();
 
 	//Variables and functions necessary for properly configuring the serial interface
 	//Determines whether or not we should initialize or re-initialize the serial connection
@@ -92,6 +93,8 @@ private:
 	//Counters/timers to track our status
 	perf_counter_t	_loop_perf{perf_alloc(PC_ELAPSED, MODULE_NAME": cycle")};
 	perf_counter_t	_loop_interval_perf{perf_alloc(PC_INTERVAL, MODULE_NAME": output update interval")};
+
+	VertiqTelemetryManager _telem_manager;
 
 	//We need a serial handler in order to talk over the serial port
 	VertiqSerialInterface _serial_interface;
@@ -133,9 +136,9 @@ private:
 
 	bool _send_forced_arm = true;
 
-	//We want to publish our ESC Status to anyone who will listen
+	// //We want to publish our ESC Status to anyone who will listen
 	uORB::Publication<esc_status_s> _esc_status_pub{ORB_ID(esc_status)};
-	esc_status_s		_esc_status;
+	// esc_status_s		_esc_status;
 
 	//Vertiq client information
 	static const uint8_t _kBroadcastID = 63;
