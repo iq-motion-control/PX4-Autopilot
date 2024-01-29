@@ -108,18 +108,6 @@ private:
 	//Store the telemetry bitmask for who we want to get telemetry from
 	uint16_t _telem_bitmask = 0;
 
-	//The number of modules that we're going to request telemetry from
-	uint8_t _number_of_modules_for_telem = 0;
-
-	//The bit position of the first module whose telemetry we should get
-	uint16_t _first_module_for_telem = 0;
-
-	//The bit position of the last module whose telemetry we should get
-	uint16_t _last_module_for_telem = 0;
-
-	//Current target for telemetry
-	uint16_t _current_telemetry_target_module_id = 0;
-
 	//This is the variable we're actually going to use in the brodcast packed control message
 	//We set and use it to _current_telemetry_target_module_id until we send the first
 	//broadcast message with this as the tail byte. after that first transmission, set it
@@ -127,9 +115,6 @@ private:
 	uint16_t _telemetry_request_id = 0;
 
 	static const uint8_t _impossible_module_id = 255;
-
-	//The amount of time (in ms) that we'll wait for a telemetry response
-	static const hrt_abstime _telem_timeout = 50_ms;
 
 	//The system time the last time that we got telemetry
 	hrt_abstime _time_of_last_telem_request = 0;

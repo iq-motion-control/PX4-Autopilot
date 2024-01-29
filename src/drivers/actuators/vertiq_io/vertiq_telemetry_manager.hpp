@@ -68,6 +68,7 @@ class VertiqTelemetryManager{
 	//The system time the last time that we got telemetry
 	hrt_abstime _time_of_last_telem_request = 0;
 
+	static const uint8_t _impossible_module_id = 255;
 };
 
 #endif

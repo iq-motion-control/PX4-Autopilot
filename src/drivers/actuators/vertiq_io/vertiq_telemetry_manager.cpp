@@ -103,7 +103,7 @@ uint16_t VertiqTelemetryManager::UpdateTelemetry(){
 		return find_next_motor_for_telemetry();
 	}
 
-	return 255;
+	return _impossible_module_id;
 }
 
 uint16_t VertiqTelemetryManager::find_next_motor_for_telemetry(){
