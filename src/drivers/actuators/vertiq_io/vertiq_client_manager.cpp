@@ -68,6 +68,29 @@ void VertiqClientManager::SendSetVelocitySetpoint(uint16_t velocity_setpoint){
 	_broadcast_prop_motor_control.ctrl_velocity_.set(*_serial_interface->get_iquart_interface(), velocity_setpoint);
 }
 
+void VertiqClientManager::SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData value){
+	//Note that we have to use the brackets to make sure that the ClientEntry objects have a scope
+	switch(descriptor){
+		case 'f': {
+			ClientEntry<float> * float_entry = (ClientEntry<float> *)(entry);
+			float_entry->set(*_serial_interface->get_iquart_interface(), value.float_data);
+			float_entry->save(*_serial_interface->get_iquart_interface());
+		break;
+		}
+		case 'b':{
+			ClientEntry<uint8_t> * byte_entry = (ClientEntry<uint8_t> *)(entry);
+			byte_entry->set(*_serial_interface->get_iquart_interface(), value.uint_data);
+			byte_entry->save(*_serial_interface->get_iquart_interface());
+		break;
+		}
+	}
+
+	_serial_interface->process_serial_tx();
+
+	// _prop_input_parser_client->velocity_max_.set(*_serial_interface->get_iquart_interface(), value);
+	// _prop_input_parser_client->velocity_max_.save(*_serial_interface->get_iquart_interface());
+}
+
 bool VertiqClientManager::FloatsAreClose(float val1, float val2, float tolerance){
 	float diff = val1 - val2;
 	return(abs(diff) < tolerance);
@@ -262,6 +285,8 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 	hrt_abstime time_now = hrt_absolute_time();
 	hrt_abstime end_time = time_now + timeout;
 
+	EntryData entry_values;
+
 	uint32_t module_read_value = 0;
 	float module_float_value = 0;
 
@@ -280,9 +305,8 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				param_get(param_find("MAX_VELOCITY"), &px4_float_value);
 
 				if(!FloatsAreClose(px4_float_value, module_float_value)){
-					_prop_input_parser_client->velocity_max_.set(*_serial_interface->get_iquart_interface(), px4_float_value);
-					_prop_input_parser_client->velocity_max_.save(*_serial_interface->get_iquart_interface());
-					_serial_interface->process_serial_tx();
+					entry_values.float_data = px4_float_value;
+					SendSetAndSave(&(_prop_input_parser_client->velocity_max_), 'f', entry_values);
 					PX4_INFO("max velo changed");
 				}
 			}
@@ -298,9 +322,8 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				param_get(param_find("MAX_VOLTS"), &px4_float_value);
 
 				if(!FloatsAreClose(px4_float_value, module_float_value)){
-					_prop_input_parser_client->volts_max_.set(*_serial_interface->get_iquart_interface(), px4_float_value);
-					_prop_input_parser_client->volts_max_.save(*_serial_interface->get_iquart_interface());
-					_serial_interface->process_serial_tx();
+					entry_values.float_data = px4_float_value;
+					SendSetAndSave(&(_prop_input_parser_client->volts_max_), 'f', entry_values);
 					PX4_INFO("max volts changed");
 				}
 			}
@@ -316,9 +339,8 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				param_get(param_find("CONTROL_MODE"), &px4_read_value);
 
 				if((uint32_t)px4_read_value != module_read_value){
-					_prop_input_parser_client->mode_.set(*_serial_interface->get_iquart_interface(), (uint32_t)px4_read_value);
-					_prop_input_parser_client->mode_.save(*_serial_interface->get_iquart_interface());
-					_serial_interface->process_serial_tx();
+					entry_values.uint_data = (uint32_t)px4_read_value;
+					SendSetAndSave(&(_prop_input_parser_client->mode_), 'b', entry_values);
 					PX4_INFO("control mode changed");
 				}
 			}
@@ -334,9 +356,8 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				param_get(param_find("VERTIQ_MOTOR_DIR"), &px4_read_value);
 
 				if((uint32_t)px4_read_value != module_read_value){
-					_prop_input_parser_client->sign_.set(*_serial_interface->get_iquart_interface(), (uint32_t)px4_read_value);
-					_prop_input_parser_client->sign_.save(*_serial_interface->get_iquart_interface());
-					_serial_interface->process_serial_tx();
+					entry_values.uint_data = (uint32_t)px4_read_value;
+					SendSetAndSave(&(_prop_input_parser_client->sign_), 'b', entry_values);
 					PX4_INFO("motor dir changed");
 				}
 			}
@@ -352,9 +373,8 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				param_get(param_find("THROTTLE_CVI"), &px4_read_value);
 
 				if((uint32_t)px4_read_value != module_read_value){
-					_ifci_client->throttle_cvi_.set(*_serial_interface->get_iquart_interface(), (uint32_t)px4_read_value);
-					_ifci_client->throttle_cvi_.save(*_serial_interface->get_iquart_interface());
-					_serial_interface->process_serial_tx();
+					entry_values.uint_data = (uint32_t)px4_read_value;
+					SendSetAndSave(&(_ifci_client->throttle_cvi_), 'b', entry_values);
 					PX4_INFO("throttle cvi changed");
 				}
 			}
