@@ -98,22 +98,27 @@ void VertiqIo::Run()
 void VertiqIo::parameters_update(){
 	//If someone has changed (any parameter in our module!)
 	if (_parameter_update_sub.updated()) {
-
 		//Grab the changed parameter with copy (which lowers the "changed" flag)
 		parameter_update_s param_update;
 		_parameter_update_sub.copy(&param_update);
+
+		// If any parameter updated, call updateParams() to check if
+		// this class attributes need updating (and do so).
+		updateParams();
 
 		#ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
 		_client_manager.GetAllSystemControlEntries();
 		#endif
 
 		#ifdef CONFIG_USE_IFCI_CONFIGURATION
+		if(_param_vertiq_trigger_read.get()){
+			_client_manager.MarkIfciConfigsForRefresh();
+			_param_vertiq_trigger_read.set(false);
+			_param_vertiq_trigger_read.commit_no_notification();
+		}
+
 		_client_manager.UpdateIfciConfigParams();
 		#endif
-
-		// If any parameter updated, call updateParams() to check if
-		// this class attributes need updating (and do so).
-		updateParams();
 	}
 }
 

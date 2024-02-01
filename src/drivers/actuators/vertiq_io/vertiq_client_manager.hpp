@@ -53,8 +53,9 @@ class VertiqClientManager{
 
 	uint8_t GetNumberOfClients();
 
-	void SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData value);
-	void InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData value);
+	void SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData * value);
+	void InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value);
+	void UpdateParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value, ClientEntryAbstract * entry);
 
 	#ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
 	void GetAllSystemControlEntries();
@@ -62,6 +63,7 @@ class VertiqClientManager{
 	#endif
 
 	#ifdef CONFIG_USE_IFCI_CONFIGURATION
+	void MarkIfciConfigsForRefresh();
 	void UpdateIfciConfigParams();
 	void CoordinateIquartWithPx4Params(hrt_abstime timeout = 2_s);
 	#endif
@@ -73,14 +75,14 @@ class VertiqClientManager{
 	//IQUART Client configuration
 	IFCI _motor_interface;
 
-	bool _needs_iquart_init;
-	bool _init_velocity_max = true;
-	bool _init_volts_max = true;
-	bool _init_mode = true;
-	bool _init_throttle_cvi = true;
-	bool _init_motor_dir = true;
-	bool _init_fc_dir = true;
-
+	#ifdef CONFIG_USE_IFCI_CONFIGURATION
+		bool _init_velocity_max = true;
+		bool _init_volts_max = true;
+		bool _init_mode = true;
+		bool _init_throttle_cvi = true;
+		bool _init_motor_dir = true;
+		bool _init_fc_dir = true;
+	#endif
 
 	//Vertiq client information
 	//Some constants to help us out
@@ -104,7 +106,6 @@ class VertiqClientManager{
 	//Make all of the clients that we need to talk to the IFCI config params
 	IQUartFlightControllerInterfaceClient * _ifci_client;
 	EscPropellerInputParserClient * _prop_input_parser_client;
-	SystemControlClient * _system_control_client;
 	#endif
 
 	bool FloatsAreClose(float val1, float val2, float tolerance = 0.01);

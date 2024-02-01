@@ -133,6 +133,7 @@ private:
 	(ParamInt<px4::params::ARMING_BEHAVE>) _param_vertiq_arm_behavior,
 	(ParamInt<px4::params::MODULE_ID>) _param_vertiq_module_id
 	#ifdef CONFIG_USE_IFCI_CONFIGURATION
+	,(ParamBool<px4::params::TRIGGER_READ>) _param_vertiq_trigger_read
 	,(ParamInt<px4::params::THROTTLE_CVI>) _param_vertiq_throttle_cvi
 	,(ParamInt<px4::params::CONTROL_MODE>) _param_vertiq_control_mode
 	,(ParamFloat<px4::params::MAX_VELOCITY>) _param_vertiq_max_velo

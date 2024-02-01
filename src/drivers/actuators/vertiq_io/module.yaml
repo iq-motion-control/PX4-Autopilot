@@ -92,15 +92,12 @@ parameters:
                     Module ID words that mean things
             type: int32
             reboot_required: true
-        # OBJECT_ID:
-        #     description:
-        #         short: The target module's Module ID
-        #         long: |
-        #             Object ID words that mean things
-        #     type: int32
-        #     reboot_required: true
-    - group: IFCI Configuration
-      definitions:
+        TRIGGER_READ:
+            description:
+                short: The module's Module ID
+                long: |
+                    Module ID words that mean things
+            type: boolean
         THROTTLE_CVI:
             description:
                 short: The module's firmware version

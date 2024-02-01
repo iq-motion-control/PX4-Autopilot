@@ -3,7 +3,6 @@
 
 VertiqClientManager::VertiqClientManager(VertiqSerialInterface * serial_interface) :
 	_serial_interface(serial_interface),
-	_needs_iquart_init(true),
 	_broadcast_prop_motor_control(_kBroadcastID), //Initialize with a module ID of 63 for broadcasting
 	_broadcast_arming_handler(_kBroadcastID)
 
@@ -68,9 +67,9 @@ void VertiqClientManager::SendSetVelocitySetpoint(uint16_t velocity_setpoint){
 	_broadcast_prop_motor_control.ctrl_velocity_.set(*_serial_interface->get_iquart_interface(), velocity_setpoint);
 }
 
-void VertiqClientManager::InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData value){
-	float float_value = value.float_data;
-	uint32_t uint_value = value.uint_data;
+void VertiqClientManager::InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value){
+	float float_value = value->float_data;
+	uint32_t uint_value = value->uint_data;
 
 	switch(descriptor){
 		case 'f':
@@ -82,27 +81,34 @@ void VertiqClientManager::InitParameter(param_t parameter, bool * init_bool, cha
 			param_set(parameter, &(uint_value));
 			*init_bool = false;
 		break;
+
+		default:
+		return; //Don't go any further
+		break;
 	}
 }
 
-
-void VertiqClientManager::SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData value){
+void VertiqClientManager::SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData * value){
 	//Note that we have to use the brackets to make sure that the ClientEntry objects have a scope
 	switch(descriptor){
 		case 'f': {
 			ClientEntry<float> * float_entry = (ClientEntry<float> *)(entry);
-			float_entry->set(*_serial_interface->get_iquart_interface(), value.float_data);
+			float_entry->set(*_serial_interface->get_iquart_interface(), value->float_data);
 			float_entry->save(*_serial_interface->get_iquart_interface());
 		break;
 		}
 		case 'b':{
 			ClientEntry<uint8_t> * byte_entry = (ClientEntry<uint8_t> *)(entry);
-			byte_entry->set(*_serial_interface->get_iquart_interface(), value.uint_data);
+			byte_entry->set(*_serial_interface->get_iquart_interface(), value->uint_data);
 			byte_entry->save(*_serial_interface->get_iquart_interface());
 		break;
 		}
+		default:
+		return; //Don't go any further
+		break;
 	}
 
+	//Make sure our message gets out
 	_serial_interface->process_serial_tx();
 }
 
@@ -111,6 +117,55 @@ bool VertiqClientManager::FloatsAreClose(float val1, float val2, float tolerance
 	return(abs(diff) < tolerance);
 }
 
+void VertiqClientManager::UpdateParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value, ClientEntryAbstract * entry){
+	//Note that we have to use the brackets to make sure that the ClientEntry objects have a scope
+	switch(descriptor){
+		case 'f': {
+			float module_float_value = 0;
+			float px4_float_value = 0;
+			ClientEntry<float> * float_entry = (ClientEntry<float> *)(entry);
+			if(float_entry->IsFresh()){
+				module_float_value = float_entry->get_reply();
+
+				if(*init_bool){
+					value->float_data = module_float_value;
+					InitParameter(parameter, init_bool, descriptor, value);
+				}else{
+					param_get(parameter, &px4_float_value);
+
+					if(!FloatsAreClose(px4_float_value, module_float_value)){
+						value->float_data = px4_float_value;
+						SendSetAndSave(float_entry, descriptor, value);
+					}
+				}
+			}
+		break;
+		}
+		case 'b':{
+			uint32_t module_read_value = 0;
+			int32_t px4_read_value = 0;
+			ClientEntry<uint8_t> * byte_entry = (ClientEntry<uint8_t> *)(entry);
+			if(byte_entry->IsFresh()){
+				module_read_value = byte_entry->get_reply();
+				if(*init_bool){
+					value->uint_data = module_read_value;
+					InitParameter(parameter, init_bool, 'b', value);
+				}else{
+					param_get(parameter, &px4_read_value);
+
+					if((uint32_t)px4_read_value != module_read_value){
+						value->uint_data = (uint32_t)px4_read_value;
+						SendSetAndSave(byte_entry, 'b', value);
+					}
+				}
+			}
+		break;
+		}
+		default:
+		return; //Don't go any further
+		break;
+	}
+}
 
 #ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
 void VertiqClientManager::GetAllSystemControlEntries(){
@@ -141,7 +196,6 @@ void VertiqClientManager::GetAllSystemControlEntries(){
 
 	WaitForSystemControlResponses(100_ms);
 }
-
 
 void VertiqClientManager::WaitForSystemControlResponses(hrt_abstime timeout){
 	//Get the start time and the end time
@@ -277,10 +331,18 @@ void VertiqClientManager::WaitForSystemControlResponses(hrt_abstime timeout){
 
 	PX4_INFO("Done getting responses");
 }
-
 #endif //CONFIG_USE_SYSTEM_CONTROL_CLIENT
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
+
+void VertiqClientManager::MarkIfciConfigsForRefresh(){
+	_init_velocity_max = true;
+	_init_volts_max = true;
+	_init_mode = true;
+	_init_throttle_cvi = true;
+	_init_motor_dir = true;
+	_init_fc_dir = true;
+}
 
 void VertiqClientManager::UpdateIfciConfigParams(){
 	_prop_input_parser_client->velocity_max_.get(*_serial_interface->get_iquart_interface());
@@ -290,7 +352,7 @@ void VertiqClientManager::UpdateIfciConfigParams(){
 	_prop_input_parser_client->flip_negative_.get(*_serial_interface->get_iquart_interface());
 	_ifci_client->throttle_cvi_.get(*_serial_interface->get_iquart_interface());
 
-	//Update our serial tx before we take in the RX
+	//Ensure that these messages get out
 	_serial_interface->process_serial_tx();
 
 	CoordinateIquartWithPx4Params(100_ms);
@@ -303,110 +365,20 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 
 	EntryData entry_values;
 
-	uint32_t module_read_value = 0;
-	float module_float_value = 0;
-
-	int32_t px4_read_value = 0;
-	float px4_float_value = 0;
-
 	while(time_now < end_time){
-		if(_prop_input_parser_client->velocity_max_.IsFresh()){
-			module_float_value = _prop_input_parser_client->velocity_max_.get_reply();
-
-			if(_init_velocity_max){
-				entry_values.float_data = module_float_value;
-				InitParameter(param_find("MAX_VELOCITY"), &_init_velocity_max, 'f', entry_values);
-			}else{
-				param_get(param_find("MAX_VELOCITY"), &px4_float_value);
-
-				if(!FloatsAreClose(px4_float_value, module_float_value)){
-					entry_values.float_data = px4_float_value;
-					SendSetAndSave(&(_prop_input_parser_client->velocity_max_), 'f', entry_values);
-				}
-			}
-		}
-
-		if(_prop_input_parser_client->volts_max_.IsFresh()){
-			module_float_value = _prop_input_parser_client->volts_max_.get_reply();
-			if(_init_volts_max){
-				entry_values.float_data = module_float_value;
-				InitParameter(param_find("MAX_VOLTS"), &_init_volts_max, 'f', entry_values);
-			}else{
-				param_get(param_find("MAX_VOLTS"), &px4_float_value);
-
-				if(!FloatsAreClose(px4_float_value, module_float_value)){
-					entry_values.float_data = px4_float_value;
-					SendSetAndSave(&(_prop_input_parser_client->volts_max_), 'f', entry_values);
-				}
-			}
-		}
-
-		if(_prop_input_parser_client->mode_.IsFresh()){
-			module_read_value = _prop_input_parser_client->mode_.get_reply();
-			if(_init_mode){
-				entry_values.uint_data = module_read_value;
-				InitParameter(param_find("CONTROL_MODE"), &_init_mode, 'b', entry_values);
-			}else{
-				param_get(param_find("CONTROL_MODE"), &px4_read_value);
-
-				if((uint32_t)px4_read_value != module_read_value){
-					entry_values.uint_data = (uint32_t)px4_read_value;
-					SendSetAndSave(&(_prop_input_parser_client->mode_), 'b', entry_values);
-				}
-			}
-		}
-
-		if(_prop_input_parser_client->sign_.IsFresh()){
-			module_read_value = _prop_input_parser_client->sign_.get_reply();
-			if(_init_motor_dir){
-				entry_values.uint_data = module_read_value;
-				InitParameter(param_find("VERTIQ_MOTOR_DIR"), &_init_motor_dir, 'b', entry_values);
-			}else{
-				param_get(param_find("VERTIQ_MOTOR_DIR"), &px4_read_value);
-
-				if((uint32_t)px4_read_value != module_read_value){
-					entry_values.uint_data = (uint32_t)px4_read_value;
-					SendSetAndSave(&(_prop_input_parser_client->sign_), 'b', entry_values);
-				}
-			}
-		}
-
-		if(_prop_input_parser_client->flip_negative_.IsFresh()){
-			module_read_value = _prop_input_parser_client->flip_negative_.get_reply();
-			if(_init_fc_dir){
-				entry_values.uint_data = module_read_value;
-				InitParameter(param_find("VERTIQ_FC_DIR"), &_init_motor_dir, 'b', entry_values);
-			}else{
-				param_get(param_find("VERTIQ_FC_DIR"), &px4_read_value);
-
-				if((uint32_t)px4_read_value != module_read_value){
-					entry_values.uint_data = (uint32_t)px4_read_value;
-					SendSetAndSave(&(_prop_input_parser_client->flip_negative_), 'b', entry_values);
-				}
-			}
-		}
-
-		if(_ifci_client->throttle_cvi_.IsFresh()){
-			module_read_value = _ifci_client->throttle_cvi_.get_reply();
-			if(_init_throttle_cvi){
-				entry_values.uint_data = module_read_value;
-				InitParameter(param_find("THROTTLE_CVI"), &_init_throttle_cvi, 'b', entry_values);
-			}else{
-				param_get(param_find("THROTTLE_CVI"), &px4_read_value);
-
-				if((uint32_t)px4_read_value != module_read_value){
-					entry_values.uint_data = (uint32_t)px4_read_value;
-					SendSetAndSave(&(_ifci_client->throttle_cvi_), 'b', entry_values);
-				}
-			}
-		}
+		// param_t parameter, bool * init_bool, char descriptor, EntryData value, ClientEntryAbstract * entry
+		UpdateParameter(param_find("MAX_VELOCITY"), &_init_velocity_max, 'f', &entry_values, &(_prop_input_parser_client->velocity_max_));
+		UpdateParameter(param_find("MAX_VOLTS"), &_init_volts_max, 'f', &entry_values, &(_prop_input_parser_client->volts_max_));
+		UpdateParameter(param_find("CONTROL_MODE"), &_init_mode, 'b',  &entry_values, &(_prop_input_parser_client->mode_));
+		UpdateParameter(param_find("VERTIQ_MOTOR_DIR"), &_init_motor_dir, 'b',  &entry_values, &(_prop_input_parser_client->sign_));
+		UpdateParameter(param_find("VERTIQ_FC_DIR"), &_init_fc_dir, 'b',  &entry_values, &(_prop_input_parser_client->flip_negative_));
+		UpdateParameter(param_find("THROTTLE_CVI"), &_init_throttle_cvi, 'b',  &entry_values, &(_ifci_client->throttle_cvi_));
 
 		//Update
 		time_now = hrt_absolute_time();
 		//Update our serial rx
 		_serial_interface->process_serial_rx(&_motor_interface, _client_array);
-		// HandleClientCommunication();
 	}
 }
 
-#endif
+#endif //CONFIG_USE_IFCI_CONFIGURATION
