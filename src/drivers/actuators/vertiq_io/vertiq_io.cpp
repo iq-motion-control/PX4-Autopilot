@@ -16,7 +16,7 @@ VertiqIo::VertiqIo() :
 	//Make sure we get the correct initial values for our parameters
 	updateParams();
 
-	_client_manager.Init((uint8_t)_param_vertiq_module_id.get());
+	_client_manager.Init((uint8_t)_param_vertiq_target_module_id.get());
 	_motor_interface_ptr = _client_manager.GetMotorInterface();
 
 	_serial_interface.SetNumberOfClients(_client_manager.GetNumberOfClients());

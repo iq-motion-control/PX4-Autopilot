@@ -131,7 +131,7 @@ private:
 	(ParamInt<px4::params::DISARM_THROTTLE>) _param_vertiq_disarm_throttle,
 	(ParamInt<px4::params::DISARM_BEHAVE>) _param_vertiq_disarm_behavior,
 	(ParamInt<px4::params::ARMING_BEHAVE>) _param_vertiq_arm_behavior,
-	(ParamInt<px4::params::MODULE_ID>) _param_vertiq_module_id
+	(ParamInt<px4::params::TARGET_MODULE_ID>) _param_vertiq_target_module_id
 	#ifdef CONFIG_USE_IFCI_CONFIGURATION
 	,(ParamBool<px4::params::TRIGGER_READ>) _param_vertiq_trigger_read
 	,(ParamInt<px4::params::THROTTLE_CVI>) _param_vertiq_throttle_cvi
