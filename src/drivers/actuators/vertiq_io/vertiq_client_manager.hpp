@@ -32,6 +32,9 @@ class VertiqClientManager{
 	public:
 	VertiqClientManager(VertiqSerialInterface * serial_interface);
 
+	/**
+	* @brief Initialize all of our clients with the object ID given by the PX4 parameter TARGET_MODULE_ID
+	*/
 	void Init(uint8_t object_id);
 
 	/**
@@ -39,22 +42,82 @@ class VertiqClientManager{
 	*/
 	void HandleClientCommunication();
 
+	/**
+	* @brief Returns access to our IFCI interface
+	* @return A pointer to our IFCI interface _motor_interface
+	*/
 	IFCI * GetMotorInterface();
 
+	/**
+	* @brief Add a set to the output buffer that will force the connected motor to arm
+	*/
 	void SendSetForceArm();
+
+	/**
+	* @brief Add a set to the output buffer that will force the connected motor to disarm
+	*/
 	void SendSetForceDisarm();
+
+	/**
+	* @brief Add a set to the output buffer that will force the connected motor to coast
+	*/
 	void SendSetCoast();
+
+	/**
+	* @brief Add a set to the output buffer that will force the connected motor to spin at a given setpoint
+	* @param velocity_setpoint the raw 16-bit velocity command going to the motor
+	*/
 	void SendSetVelocitySetpoint(uint16_t velocity_setpoint);
 
+	/**
+	* @brief Returns the number of clients that we've initialized
+	* @return The value contained in _clients_in_use
+	*/
 	uint8_t GetNumberOfClients();
 
+	/**
+	* @brief Send the connected module both a set and a save for a given IQUART entry
+	* @param entry A pointer to the entry that you want to communicate with
+	* @param descriptor A character that determines what type of ClientEntryAbstract/data is in use. 'f' if it's a float, 'b' if it's a uint8_t
+	* @param value A pointer to a union that holds the value that we are setting in the conrrect format. Format is decoded by descriptor
+	*/
 	void SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData * value);
+
+	/**
+	* @brief Initializes the PX4 parameter version of an IQUART Entry to have the same value as is stored on the module. After setting
+	*        this function lowers the flag indicating that we should initialize the value during updating
+	* @param parameter The PX4 parameter we're editing
+	* @param init_bool A pointer to the bool that we need to put down
+	* @param descriptor A character that determines what type of ClientEntryAbstract/data is in use. 'f' if it's a float, 'b' if it's a uint8_t
+	* @param value A pointer to a union that holds the value that we are setting in the conrrect format. Format is decoded by descriptor
+	*/
 	void InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value);
+
+	/**
+	* @brief Handles calling either InitParameter or SendSetAndSave depending on the state of the parameter init_bool
+	* @param parameter The PX4 parameter we're editing
+	* @param init_bool A pointer to the bool that we need to put down
+	* @param descriptor A character that determines what type of ClientEntryAbstract/data is in use. 'f' if it's a float, 'b' if it's a uint8_t
+	* @param value A pointer to a union that holds the value that we are setting in the conrrect format. Format is decoded by descriptor
+	* @param entry A pointer to the entry that you want to communicate with
+	*/
 	void UpdateParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value, ClientEntryAbstract * entry);
 
 	#ifdef CONFIG_USE_IFCI_CONFIGURATION
+	/**
+	* @brief Set all of the IFCI configuration init flags to true
+	*/
 	void MarkIfciConfigsForRefresh();
+
+	/**
+	* @brief Send a Get command to all of the parameters involved in IFCI configuration, and make sure the PX4 parameters and module values agree
+	*/
 	void UpdateIfciConfigParams();
+
+	/**
+	* @brief Until the timeout is reached, keep trying to update the PX4 parameters to match, as appropraite, the value on the module. This can
+	*	mean either setting the PX4 parameter to match the motor or vice versa
+	*/
 	void CoordinateIquartWithPx4Params(hrt_abstime timeout = 2_s);
 	#endif
 
