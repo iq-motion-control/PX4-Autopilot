@@ -111,6 +111,7 @@ void VertiqIo::parameters_update(){
 		#endif
 
 		#ifdef CONFIG_USE_IFCI_CONFIGURATION
+		//If you're set to re-read from the motor, mark all of the IFCI parameters for reinitialization, reset the trigger, and then update the IFCI params
 		if(_param_vertiq_trigger_read.get()){
 			_client_manager.MarkIfciConfigsForRefresh();
 			_param_vertiq_trigger_read.set(false);
@@ -118,7 +119,7 @@ void VertiqIo::parameters_update(){
 		}
 
 		_client_manager.UpdateIfciConfigParams();
-		#endif
+		#endif //CONFIG_USE_IFCI_CONFIGURATION
 	}
 }
 
