@@ -7,10 +7,10 @@ VertiqTelemetryManager::VertiqTelemetryManager(IFCI * motor_interface) :
 
 void VertiqTelemetryManager::Init(uint16_t telem_bitmask){
 	_telem_bitmask = telem_bitmask;
-	find_first_and_last_telemetry_positions();
+	FindFirstAndLastTelemetryPositions();
 }
 
-void VertiqTelemetryManager::find_first_and_last_telemetry_positions(){
+void VertiqTelemetryManager::FindFirstAndLastTelemetryPositions(){
 	uint16_t shift_val = 0x0001;
 	bool found_first = false;
 
@@ -100,13 +100,13 @@ uint16_t VertiqTelemetryManager::UpdateTelemetry(){
 		_time_of_last_telem_request = hrt_absolute_time();
 
 		//update the telem target
-		return find_next_motor_for_telemetry();
+		return FindNextMotorForTelemetry();
 	}
 
 	return _impossible_module_id;
 }
 
-uint16_t VertiqTelemetryManager::find_next_motor_for_telemetry(){
+uint16_t VertiqTelemetryManager::FindNextMotorForTelemetry(){
 	//If the current telemetry is the highest available, wrap around to the first one
 	//If we're below the max, find the next available.
 

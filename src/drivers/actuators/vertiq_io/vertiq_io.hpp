@@ -90,6 +90,7 @@ private:
 	//We need a telemetry handler
 	VertiqTelemetryManager _telem_manager;
 
+	//Pointer to the IFCI handler
 	IFCI * _motor_interface_ptr;
 
 	//Store the number of control variables that we're using
