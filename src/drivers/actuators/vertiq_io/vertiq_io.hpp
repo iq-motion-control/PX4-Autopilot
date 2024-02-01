@@ -116,8 +116,6 @@ private:
 	 */
 	void parameters_update();
 
-	int i = 0;
-
 	// Subscriptions
 	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
 
