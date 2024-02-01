@@ -54,6 +54,7 @@ class VertiqClientManager{
 	uint8_t GetNumberOfClients();
 
 	void SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData value);
+	void InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData value);
 
 	#ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
 	void GetAllSystemControlEntries();
