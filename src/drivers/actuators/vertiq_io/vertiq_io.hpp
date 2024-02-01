@@ -138,6 +138,7 @@ private:
 	,(ParamFloat<px4::params::MAX_VELOCITY>) _param_vertiq_max_velo
 	,(ParamFloat<px4::params::MAX_VOLTS>) _param_vertiq_max_volts
 	,(ParamInt<px4::params::VERTIQ_MOTOR_DIR>) _param_vertiq_motor_direction
+	,(ParamInt<px4::params::VERTIQ_FC_DIR>) _param_vertiq_fc_direction
 	#endif
 	// #ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
 	// ,(ParamInt<px4::params::OBJECT_ID>) _param_vertiq_sys_ctrl_id

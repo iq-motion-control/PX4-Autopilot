@@ -136,7 +136,17 @@ parameters:
                     firmware version words that mean things
             type: enum
             values:
+                0: Unconfigured
                 1: 3D Counter Clockwise
                 2: 3D Clockwise
                 3: 2D Counter Clockwise
                 4: 2D Clockwise
+        VERTIQ_FC_DIR:
+            description:
+                short: The module's firmware version
+                long: |
+                    firmware version words that mean things
+            type: enum
+            values:
+                0: 2D
+                1: 3D

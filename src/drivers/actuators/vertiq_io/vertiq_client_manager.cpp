@@ -287,6 +287,7 @@ void VertiqClientManager::UpdateIfciConfigParams(){
 	_prop_input_parser_client->volts_max_.get(*_serial_interface->get_iquart_interface());
 	_prop_input_parser_client->mode_.get(*_serial_interface->get_iquart_interface());
 	_prop_input_parser_client->sign_.get(*_serial_interface->get_iquart_interface());
+	_prop_input_parser_client->flip_negative_.get(*_serial_interface->get_iquart_interface());
 	_ifci_client->throttle_cvi_.get(*_serial_interface->get_iquart_interface());
 
 	//Update our serial tx before we take in the RX
@@ -351,7 +352,6 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				if((uint32_t)px4_read_value != module_read_value){
 					entry_values.uint_data = (uint32_t)px4_read_value;
 					SendSetAndSave(&(_prop_input_parser_client->mode_), 'b', entry_values);
-					PX4_INFO("control mode changed");
 				}
 			}
 		}
@@ -367,7 +367,21 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				if((uint32_t)px4_read_value != module_read_value){
 					entry_values.uint_data = (uint32_t)px4_read_value;
 					SendSetAndSave(&(_prop_input_parser_client->sign_), 'b', entry_values);
-					PX4_INFO("motor dir changed");
+				}
+			}
+		}
+
+		if(_prop_input_parser_client->flip_negative_.IsFresh()){
+			module_read_value = _prop_input_parser_client->flip_negative_.get_reply();
+			if(_init_fc_dir){
+				entry_values.uint_data = module_read_value;
+				InitParameter(param_find("VERTIQ_FC_DIR"), &_init_motor_dir, 'b', entry_values);
+			}else{
+				param_get(param_find("VERTIQ_FC_DIR"), &px4_read_value);
+
+				if((uint32_t)px4_read_value != module_read_value){
+					entry_values.uint_data = (uint32_t)px4_read_value;
+					SendSetAndSave(&(_prop_input_parser_client->flip_negative_), 'b', entry_values);
 				}
 			}
 		}
@@ -383,7 +397,6 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 				if((uint32_t)px4_read_value != module_read_value){
 					entry_values.uint_data = (uint32_t)px4_read_value;
 					SendSetAndSave(&(_ifci_client->throttle_cvi_), 'b', entry_values);
-					PX4_INFO("throttle cvi changed");
 				}
 			}
 		}
