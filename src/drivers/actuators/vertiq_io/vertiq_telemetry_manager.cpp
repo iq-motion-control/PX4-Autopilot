@@ -6,6 +6,7 @@ VertiqTelemetryManager::VertiqTelemetryManager(IFCI * motor_interface) :
 {}
 
 void VertiqTelemetryManager::Init(uint16_t telem_bitmask){
+	//On init, make sure to set our bitmask, and then go ahead and find the front and back 1s
 	_telem_bitmask = telem_bitmask;
 	FindFirstAndLastTelemetryPositions();
 }
@@ -39,6 +40,7 @@ void VertiqTelemetryManager::FindFirstAndLastTelemetryPositions(){
 }
 
 void VertiqTelemetryManager::StartPublishing(uORB::Publication<esc_status_s> * esc_status_pub){
+	//Initialize our ESC status publishing
 	_esc_status.timestamp          = hrt_absolute_time();
 	_esc_status.counter            = 0;
 	_esc_status.esc_count          = _number_of_modules_for_telem;
@@ -58,6 +60,7 @@ void VertiqTelemetryManager::StartPublishing(uORB::Publication<esc_status_s> * e
 		_esc_status.esc[i].esc_power       = 0;
 	}
 
+	//Start advertising to the world
 	esc_status_pub->advertise();
 }
 
@@ -82,7 +85,7 @@ uint16_t VertiqTelemetryManager::UpdateTelemetry(){
 		_esc_status.esc[_current_telemetry_target_module_id].esc_voltage  = telem_response.voltage * 0.01;
 		_esc_status.esc[_current_telemetry_target_module_id].esc_current  = telem_response.current * 0.01;
 		_esc_status.esc[_current_telemetry_target_module_id].esc_power    = _esc_status.esc[_current_telemetry_target_module_id].esc_voltage * _esc_status.esc[_current_telemetry_target_module_id].esc_current;
-		_esc_status.esc[_current_telemetry_target_module_id].esc_temperature = telem_response.mcu_temp * 0.01; //from matt: If you ask other escs for their temp, they're giving you the micro temp, so go with that
+		_esc_status.esc[_current_telemetry_target_module_id].esc_temperature = telem_response.mcu_temp * 0.01; //"If you ask other escs for their temp, they're giving you the micro temp, so go with that"
 		_esc_status.esc[_current_telemetry_target_module_id].esc_state    = 0; //not implemented
 		_esc_status.esc[_current_telemetry_target_module_id].esc_cmdcount = 0; //not implemented
 		_esc_status.esc[_current_telemetry_target_module_id].failures     = 0; //not implemented
