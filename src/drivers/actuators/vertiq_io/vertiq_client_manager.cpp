@@ -12,6 +12,10 @@ VertiqClientManager::VertiqClientManager(VertiqSerialInterface * serial_interfac
 }
 
 void VertiqClientManager::Init(uint8_t object_id){
+	//If we're using the IFCI configuration parameters, we need a way to talk to the motor. These clients
+	//give us access to all of the motor parameters we'll need. The Vertiq C++ library does not have a way of dynamically
+	//changing a client's object ID, and we cannot instantiate the VertiqClientManager after the serial configuration is complete.
+	//Therefore, we must make these statically.
 	#ifdef CONFIG_USE_IFCI_CONFIGURATION
 		static IQUartFlightControllerInterfaceClient ifci = IQUartFlightControllerInterfaceClient(object_id);
 		_ifci_client = &ifci;
@@ -24,11 +28,13 @@ void VertiqClientManager::Init(uint8_t object_id){
 		_clients_in_use++;
 	#endif
 
-
+	//We're done with determining how many clients we have, let the serial interface know
 	_serial_interface->SetNumberOfClients(_clients_in_use);
 }
 
 void VertiqClientManager::HandleClientCommunication(){
+	//Called periodically in the main loop to handle all communications not handled direclty by
+	//parameter setting
 	//Update our serial tx before we take in the RX
 	_serial_interface->process_serial_tx();
 
@@ -61,9 +67,12 @@ void VertiqClientManager::SendSetVelocitySetpoint(uint16_t velocity_setpoint){
 }
 
 void VertiqClientManager::InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value){
+	//We've got a union, grab out the data from both parts of it. We'll grab the correct one later
 	float float_value = value->float_data;
 	uint32_t uint_value = value->uint_data;
 
+	//If we have a float we want to grab the float value, if we have a uint, grab that.
+	//In either case, put down the init flag of whoever called us
 	switch(descriptor){
 		case 'f':
 			param_set(parameter, &(float_value));
@@ -82,6 +91,9 @@ void VertiqClientManager::InitParameter(param_t parameter, bool * init_bool, cha
 }
 
 void VertiqClientManager::SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData * value){
+	//Depending on the type of client we actually have, we're going to have to cast entry differently. We
+	//let the descriptor tell us what to cast it to.
+
 	//Note that we have to use the brackets to make sure that the ClientEntry objects have a scope
 	switch(descriptor){
 		case 'f': {
@@ -114,9 +126,13 @@ void VertiqClientManager::UpdateParameter(param_t parameter, bool * init_bool, c
 	//Note that we have to use the brackets to make sure that the ClientEntry objects have a scope
 	switch(descriptor){
 		case 'f': {
+			//go ahead and make the vars we'll need and cast the entry
 			float module_float_value = 0;
 			float px4_float_value = 0;
 			ClientEntry<float> * float_entry = (ClientEntry<float> *)(entry);
+
+			//If we got an answer go grab it. Then, if we're initializing, give the value to PX4. Otherwise, someone just
+			//set a new value to the PX4 param, so send it over to the motor if it's actually different
 			if(float_entry->IsFresh()){
 				module_float_value = float_entry->get_reply();
 
@@ -135,9 +151,13 @@ void VertiqClientManager::UpdateParameter(param_t parameter, bool * init_bool, c
 		break;
 		}
 		case 'b':{
+			//go ahead and make the vars we'll need and cast the entry
 			uint32_t module_read_value = 0;
 			int32_t px4_read_value = 0;
 			ClientEntry<uint8_t> * byte_entry = (ClientEntry<uint8_t> *)(entry);
+
+			//If we got an answer go grab it. Then, if we're initializing, give the value to PX4. Otherwise, someone just
+			//set a new value to the PX4 param, so send it over to the motor if it's actually different
 			if(byte_entry->IsFresh()){
 				module_read_value = byte_entry->get_reply();
 				if(*init_bool){
@@ -179,9 +199,10 @@ void VertiqClientManager::UpdateIfciConfigParams(){
 	_prop_input_parser_client->flip_negative_.get(*_serial_interface->get_iquart_interface());
 	_ifci_client->throttle_cvi_.get(*_serial_interface->get_iquart_interface());
 
-	//Ensure that these messages get out
+	//Ensure that these get messages get out
 	_serial_interface->process_serial_tx();
 
+	//Now go ahead and grab responses, and update everyone to be on the same page, but do it quickly.
 	CoordinateIquartWithPx4Params(100_ms);
 }
 
@@ -193,7 +214,7 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 	EntryData entry_values;
 
 	while(time_now < end_time){
-		// param_t parameter, bool * init_bool, char descriptor, EntryData value, ClientEntryAbstract * entry
+		//Go ahead and update our IFCI params
 		UpdateParameter(param_find("MAX_VELOCITY"), &_init_velocity_max, 'f', &entry_values, &(_prop_input_parser_client->velocity_max_));
 		UpdateParameter(param_find("MAX_VOLTS"), &_init_volts_max, 'f', &entry_values, &(_prop_input_parser_client->volts_max_));
 		UpdateParameter(param_find("CONTROL_MODE"), &_init_mode, 'b',  &entry_values, &(_prop_input_parser_client->mode_));
@@ -201,8 +222,9 @@ void VertiqClientManager::CoordinateIquartWithPx4Params(hrt_abstime timeout){
 		UpdateParameter(param_find("VERTIQ_FC_DIR"), &_init_fc_dir, 'b',  &entry_values, &(_prop_input_parser_client->flip_negative_));
 		UpdateParameter(param_find("THROTTLE_CVI"), &_init_throttle_cvi, 'b',  &entry_values, &(_ifci_client->throttle_cvi_));
 
-		//Update
+		//Update the time
 		time_now = hrt_absolute_time();
+
 		//Update our serial rx
 		_serial_interface->process_serial_rx(&_motor_interface, _client_array);
 	}
