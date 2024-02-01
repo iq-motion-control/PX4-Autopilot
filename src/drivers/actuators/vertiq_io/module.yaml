@@ -19,13 +19,6 @@ actuator_output:
 parameters:
     - group: Vertiq IO
       definitions:
-        VERTIQ_ENABLE:
-            description:
-                short: Enable the IQUART driver
-                long: |
-                    Determine whether or not to enable the IQUART driver. If this value is greater than 0, the driver is enabled.
-            type: int32
-            default: 1
         VERTIQ_BAUD:
             description:
                 short: The IQUART driver's baud rate

@@ -106,10 +106,6 @@ void VertiqIo::parameters_update(){
 		// this class attributes need updating (and do so).
 		updateParams();
 
-		#ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
-		_client_manager.GetAllSystemControlEntries();
-		#endif
-
 		#ifdef CONFIG_USE_IFCI_CONFIGURATION
 		//If you're set to re-read from the motor, mark all of the IFCI parameters for reinitialization, reset the trigger, and then update the IFCI params
 		if(_param_vertiq_trigger_read.get()){

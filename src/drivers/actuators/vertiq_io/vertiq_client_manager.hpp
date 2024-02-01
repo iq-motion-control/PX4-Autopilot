@@ -18,13 +18,8 @@
 #include "iq-module-communication-cpp/inc/brushless_drive_client.hpp"
 #include "iq-module-communication-cpp/inc/arming_handler_client.hpp"
 
-#ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
-#include "iq-module-communication-cpp/inc/system_control_client.hpp"
-#endif
-
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
 #include "iq-module-communication-cpp/inc/esc_propeller_input_parser_client.hpp"
-#include "iq-module-communication-cpp/inc/system_control_client.hpp"
 #include "iq-module-communication-cpp/inc/iquart_flight_controller_interface_client.hpp"
 #endif
 
@@ -56,11 +51,6 @@ class VertiqClientManager{
 	void SendSetAndSave(ClientEntryAbstract * entry, char descriptor, EntryData * value);
 	void InitParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value);
 	void UpdateParameter(param_t parameter, bool * init_bool, char descriptor, EntryData * value, ClientEntryAbstract * entry);
-
-	#ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
-	void GetAllSystemControlEntries();
-	void WaitForSystemControlResponses(hrt_abstime timeout = 2_s);
-	#endif
 
 	#ifdef CONFIG_USE_IFCI_CONFIGURATION
 	void MarkIfciConfigsForRefresh();
@@ -97,10 +87,6 @@ class VertiqClientManager{
 	//Clients
 	PropellerMotorControlClient _broadcast_prop_motor_control;
 	ArmingHandlerClient _broadcast_arming_handler;
-
-	#ifdef CONFIG_USE_SYSTEM_CONTROL_CLIENT
-	SystemControlClient * _system_control;
-	#endif
 
 	#ifdef CONFIG_USE_IFCI_CONFIGURATION
 	//Make all of the clients that we need to talk to the IFCI config params
