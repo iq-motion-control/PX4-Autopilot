@@ -192,6 +192,12 @@ private:
 		, (ParamFloat<px4::params::TORQUE_OFF_ANGLE>) _param_vertiq_pulse_torque_offset_angle
 		, (ParamFloat<px4::params::PULSE_VOLT_LIM>) _param_vertiq_pulse_voltage_limit
 #endif //CONFIG_USE_PULSING_CONFIGURATION
+////////////////////////////////////
+//User
+		, (ParamFloat<px4::params::ANGLE_STEP>) _param_vertiq_angle_step
+		, (ParamFloat<px4::params::ARM_THROT_HIGH>) _param_vertiq_throt_high
+		, (ParamFloat<px4::params::ARM_THROT_LOW>) _param_vertiq_throt_low
+////////////////////////////////////
 	)
 };
 

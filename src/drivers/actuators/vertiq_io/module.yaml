@@ -269,3 +269,24 @@ parameters:
                 62: Module ID 62
             default: 0
             reboot_required: true
+####################################
+##User Added
+        ANGLE_STEP:
+            description:
+                short: Demo - The angle step the servos will go
+                long: |
+                    Demo - The angle step the servos will go
+            type: float
+            default: 1.0
+        ARM_THROT_HIGH:
+            description:
+                short: Demo - Module's arming throttle high bound
+                long: |
+                    Demo - Module's arming throttle high bound
+            type: float
+        ARM_THROT_LOW:
+            description:
+                short: Demo - Module's arming throttle low bound
+                long: |
+                    Demo - Module's arming throttle low bound
+            type: float

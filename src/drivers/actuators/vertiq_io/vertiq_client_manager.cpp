@@ -47,6 +47,11 @@ void VertiqClientManager::Init(uint8_t object_id)
 	InitEntryWrappers();
 
 	_object_id_now = object_id;
+
+	//////////////////////////
+	//User
+	AddNewClientEntry<float, float>(param_find("ARM_THROT_HIGH"),&_user_arming_handler->arm_throttle_upper_limit_);
+	AddNewClientEntry<float, float>(param_find("ARM_THROT_LOW"), &_user_arming_handler->arm_throttle_lower_limit_);
 }
 
 void VertiqClientManager::InitVertiqClients(uint8_t object_id)
@@ -69,6 +74,11 @@ void VertiqClientManager::InitVertiqClients(uint8_t object_id)
 	_pulsing_rectangular_input_parser_client = new PulsingRectangularInputParserClient(object_id);
 	AddNewConfigurationClient(_pulsing_rectangular_input_parser_client);
 #endif //CONFIG_USE_PULSING_CONFIGURATION
+
+//////////////////////////////
+//User
+	_user_arming_handler = new ArmingHandlerClient(object_id);
+	AddNewConfigurationClient(_user_arming_handler);
 }
 
 void VertiqClientManager::InitEntryWrappers()
@@ -127,6 +137,11 @@ void VertiqClientManager::UpdateClientsToNewObjId(uint8_t new_object_id)
 	delete _pulsing_rectangular_input_parser_client;
 	_pulsing_rectangular_input_parser_client = new PulsingRectangularInputParserClient(new_object_id);
 #endif
+
+////////////////////////////////
+//User
+	delete _user_arming_handler;
+	_user_arming_handler = new ArmingHandlerClient(new_object_id);
 }
 
 void VertiqClientManager::HandleClientCommunication()

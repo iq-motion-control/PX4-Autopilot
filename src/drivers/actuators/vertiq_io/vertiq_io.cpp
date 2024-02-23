@@ -34,8 +34,26 @@
 
 #include <px4_platform_common/log.h>
 
+////////////////////////////////////////////
+//User Includes
+#include "iq-module-communication-cpp/inc/multi_turn_angle_control_client.hpp"
+
 px4::atomic_bool VertiqIo::_request_telemetry_init{false};
 char VertiqIo::_telemetry_device[] {};
+
+////////////////////////////////////////////
+//User Clients
+MultiTurnAngleControlClient multi_turn0(40);
+MultiTurnAngleControlClient multi_turn1(41);
+hrt_abstime time_1 = hrt_absolute_time();
+hrt_abstime time_2 = time_1;
+bool got_first_response_1 = false;
+bool got_first_response_2 = false;
+bool got_response_1 = false;
+bool got_response_2 = false;
+bool waiting_for_response = true;
+float read_value_1 = 0;
+float read_value_2 = 0;
 
 VertiqIo::VertiqIo() :
 	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default),
@@ -49,6 +67,11 @@ VertiqIo::VertiqIo() :
 
 	_client_manager.Init((uint8_t)_param_vertiq_target_module_id.get());
 	_client_manager.AddNewOperationalClient(&_operational_ifci);
+
+	////////////////////////////////////////////
+	//User adds operational clients
+	_client_manager.AddNewOperationalClient(&multi_turn0);
+	_client_manager.AddNewOperationalClient(&multi_turn1);
 }
 
 VertiqIo::~VertiqIo()
@@ -131,6 +154,51 @@ void VertiqIo::Run()
 		//Our test is active if anyone is giving us commands through the actuator test
 		_actuator_test_active = _actuator_test.action == actuator_test_s::ACTION_DO_CONTROL;
 	}
+
+	////////////////////////////////////////////
+	//User additions
+	//Update responses
+	if(waiting_for_response){
+		_telem_manager.PauseTelemetry();
+
+		if(!got_response_1){
+			if(multi_turn0.obs_angular_displacement_.IsFresh()){
+				read_value_1 = multi_turn0.obs_angular_displacement_.get_reply();
+				got_response_1 = true;
+				got_first_response_1 = true;
+			}else{
+				multi_turn0.obs_angular_displacement_.get(*_serial_interface.get_iquart_interface());
+			}
+		}
+
+		if(!got_response_2){
+			if(multi_turn1.obs_angular_displacement_.IsFresh()){
+				read_value_2 = multi_turn1.obs_angular_displacement_.get_reply();
+				got_response_2 = true;
+				got_first_response_2 = true;
+			}else{
+				multi_turn1.obs_angular_displacement_.get(*_serial_interface.get_iquart_interface());
+			}
+		}
+
+		waiting_for_response = !(got_response_1 && got_response_2);
+	}else{
+		_telem_manager.UnpauseTelemetry();
+		got_response_1 = false;
+		got_response_2 = false;
+		waiting_for_response = true;
+	}
+
+	if(time_2 - time_1 > 500_ms){
+		if(got_first_response_1 && got_first_response_2){
+			multi_turn0.ctrl_angle_.set(*_serial_interface.get_iquart_interface(), read_value_1 + _param_vertiq_angle_step.get());
+			multi_turn1.ctrl_angle_.set(*_serial_interface.get_iquart_interface(), read_value_2 - _param_vertiq_angle_step.get());
+		}
+		time_1 = time_2;
+	}
+
+
+	time_2 = hrt_absolute_time();
 
 	//stop our timer
 	perf_end(_loop_perf);

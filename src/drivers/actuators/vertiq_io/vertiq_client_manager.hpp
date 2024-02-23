@@ -59,6 +59,10 @@
 #include "iq-module-communication-cpp/inc/pulsing_rectangular_input_parser_client.hpp"
 #endif //CONFIG_USE_PULSING_CONFIGURATION
 
+///////////////////////////////////
+//User Added
+#include "iq-module-communication-cpp/inc/arming_handler_client.hpp"
+
 static const uint8_t _kBroadcastID = 63;
 
 class VertiqClientManager
@@ -243,6 +247,10 @@ private:
 	ArmingHandlerClient _broadcast_arming_handler;
 	IQUartFlightControllerInterfaceClient *_telem_ifci;
 	EscPropellerInputParserClient *_prop_input_parser_client;
+
+	///////////////////////////////////////
+	//User
+	ArmingHandlerClient * _user_arming_handler;
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
 	//Make all of the clients that we need to talk to the IFCI config params
