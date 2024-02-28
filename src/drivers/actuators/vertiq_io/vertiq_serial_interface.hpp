@@ -73,7 +73,7 @@ public:
 	* @brief check to see if there is any data for us coming in over the serial port. We check both our operational and configurational clients
 	* in order to make sure everyone has a chance to read each packet before it gets thrown away
 	*/
-	int process_serial_rx(ClientAbstract **operational_client_array, uint8_t number_of_operational_clients);
+	int process_serial_rx(ClientAbstract **client_array, uint8_t number_of_clients);
 
 	/**
 	* @brief check to see if there is any data that we need to transmit over serial

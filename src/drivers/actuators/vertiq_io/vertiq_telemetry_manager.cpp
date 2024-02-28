@@ -33,10 +33,9 @@
 
 #include "vertiq_telemetry_manager.hpp"
 
-VertiqTelemetryManager::VertiqTelemetryManager(IQUartFlightControllerInterfaceClient *motor_interface, VertiqClientManager * client_manager) :
+VertiqTelemetryManager::VertiqTelemetryManager(VertiqClientManager * client_manager) :
 	_client_manager(client_manager),
-	_telem_state(UNPAUSED),
-	_motor_interface(motor_interface)
+	_telem_state(UNPAUSED)
 {
 }
 

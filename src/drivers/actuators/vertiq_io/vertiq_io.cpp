@@ -41,7 +41,7 @@ VertiqIo::VertiqIo() :
 	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default),
 	_serial_interface(),
 	_client_manager(&_serial_interface),
-	_telem_manager(&_operational_ifci, &_client_manager),
+	_telem_manager(&_client_manager),
 	_configuration_handler(&_serial_interface, &_client_manager),
 	_broadcast_prop_motor_control(_kBroadcastID),
 	_broadcast_arming_handler(_kBroadcastID),

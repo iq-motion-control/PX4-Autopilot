@@ -68,7 +68,7 @@ public:
 	* @brief Construct a new VertiqTelemetryManager object with a pointer to an IFCI handler
 	* @param motor_interface A pointer to and IFCI interface
 	*/
-	VertiqTelemetryManager(IQUartFlightControllerInterfaceClient *motor_interface, VertiqClientManager * client_manager);
+	VertiqTelemetryManager(VertiqClientManager * client_manager);
 
 	/**
 	* @brief Initialize the telemetry manager with the bitmask set in the PX4 parameters
@@ -124,7 +124,6 @@ private:
 	VertiqClientManager * _client_manager;
 
 	vertiq_telemetry_pause_states _telem_state; //Keep track of whether or not we've paused telemetry
-	IQUartFlightControllerInterfaceClient *_motor_interface; //Used for broadcasting our commands
 	IQUartFlightControllerInterfaceClient *_telem_interface; //Used for reading responses from our telemetry targets
 	esc_status_s		_esc_status; //We want to publish our ESC Status to anyone who will listen
 	static const uint8_t MAX_SUPPORTABLE_MODULE_IDS = 63; //[0, 62] //The max number of module IDs that we can support

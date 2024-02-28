@@ -193,7 +193,7 @@ uint8_t * VertiqSerialInterface::ReadAndSetRxBytes(){
 	return _rx_buf;
 }
 
-int VertiqSerialInterface::process_serial_rx(ClientAbstract **operational_client_array, uint8_t number_of_operational_clients)
+int VertiqSerialInterface::process_serial_rx(ClientAbstract **client_array, uint8_t number_of_clients)
 {
 	//We have bytes
 	if (CheckForRx()) {
@@ -202,8 +202,8 @@ int VertiqSerialInterface::process_serial_rx(ClientAbstract **operational_client
 		//can decide what to do with it
 		while (_iquart_interface.PeekPacket(&data_ptr, &_bytes_available) == 1) {
 
-			for (uint8_t i = 0; i < number_of_operational_clients; i++) {
-				operational_client_array[i]->ReadMsg(data_ptr, _bytes_available);
+			for (uint8_t i = 0; i < number_of_clients; i++) {
+				client_array[i]->ReadMsg(data_ptr, _bytes_available);
 			}
 
 			_iquart_interface.DropPacket();
