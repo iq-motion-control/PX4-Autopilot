@@ -49,6 +49,8 @@
 #include <uORB/topics/esc_status.h>
 #include <uORB/topics/actuator_test.h>
 
+#include "vertiq_client_manager.hpp"
+
 #include "iq-module-communication-cpp/inc/iquart_flight_controller_interface_client.hpp"
 
 enum vertiq_telemetry_pause_states {
@@ -66,14 +68,14 @@ public:
 	* @brief Construct a new VertiqTelemetryManager object with a pointer to an IFCI handler
 	* @param motor_interface A pointer to and IFCI interface
 	*/
-	VertiqTelemetryManager(IQUartFlightControllerInterfaceClient *motor_interface);
+	VertiqTelemetryManager(IQUartFlightControllerInterfaceClient *motor_interface, VertiqClientManager * client_manager);
 
 	/**
 	* @brief Initialize the telemetry manager with the bitmask set in the PX4 parameters
 	* @param telem_bitmask The bitmask set in the PX4 parameters as VERTIQ_TEL_MSK
 	* @param telem_interface A pointer to the IFCI client we will use for telemetry
 	*/
-	void Init(uint64_t telem_bitmask, IQUartFlightControllerInterfaceClient *telem_interface);
+	void Init(uint64_t telem_bitmask);
 
 	/**
 	* @brief Start publishing the ESC statuses to the uORB esc_status topic
@@ -118,6 +120,7 @@ public:
 	vertiq_telemetry_pause_states GetTelemetryPauseState();
 
 private:
+	VertiqClientManager * _client_manager;
 
 	vertiq_telemetry_pause_states _telem_state; //Keep track of whether or not we've paused telemetry
 	IQUartFlightControllerInterfaceClient *_motor_interface; //Used for broadcasting our commands

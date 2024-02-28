@@ -48,18 +48,6 @@
 #include "entry_wrapper.hpp"
 #include "vertiq_configuration_client_handler.hpp"
 
-#include "iq-module-communication-cpp/inc/propeller_motor_control_client.hpp"
-#include "iq-module-communication-cpp/inc/brushless_drive_client.hpp"
-#include "iq-module-communication-cpp/inc/arming_handler_client.hpp"
-
-#include "iq-module-communication-cpp/inc/esc_propeller_input_parser_client.hpp"
-#include "iq-module-communication-cpp/inc/iquart_flight_controller_interface_client.hpp"
-
-#ifdef CONFIG_USE_PULSING_CONFIGURATION
-#include "iq-module-communication-cpp/inc/voltage_superposition_client.hpp"
-#include "iq-module-communication-cpp/inc/pulsing_rectangular_input_parser_client.hpp"
-#endif //CONFIG_USE_PULSING_CONFIGURATION
-
 static const uint8_t _kBroadcastID = 63;
 
 class VertiqClientManager
@@ -101,28 +89,10 @@ private:
 	//We need a serial handler in order to talk over the serial port
 	VertiqSerialInterface *_serial_interface;
 
-////////////////////////////////////////////////////////////////////////
-//Vertiq client information
-
-/**
-In order to communicate with connected Vertiq modules with the most possible flexibility, we have introduced two types of Clients (see comment above about
-Vertiq clients and entries) to be used within PX4. We have designated "Operational Clients" as those whose object IDs (a.k.a target module IDs) are constant.
-For example, when sending IFCI commands, we are always transmitting them using the object ID 63 in order to broadcast to all connected Vertiq modules. There is no
-reason to change its object ID. In order to interact with specific client entries from specific modules, we have introduced "Configuration Clients." Configuration
-clients are those whose object IDs are not constant, and which are created and destroyed as the Target Module ID parameter is updated. An example of a configuration
-parameter is each module's Velocity Max entry. Since each module has its own version of a Velocity Max entry, designated by unique module IDs, we need a way to
-dynamically change the client's object ID to reach the correct module. Our "Configuration Clients" are used to meet this end.
-
-An example of a Vertiq client is documented here https://iqmotion.readthedocs.io/en/latest/modules/vertiq_2306_2200.html#propeller-motor-control. In this case,
-Propeller Motor Control is the client, and its entries are specified in the message table (https://iqmotion.readthedocs.io/en/latest/modules/vertiq_2306_2200.html#id6).
-You can find the C++ representation in ./src/drivers/actuators/vertiq_io/iq-module-communication-cpp/inc/propeller_motor_control_client.hpp
-*/
-
 	//Some constants to help us out
 	static const uint8_t MAXIMUM_OPERATIONAL_CLIENTS = 20; //These are clients that are used for module control/telemetry. They have a static Module ID
 	ClientAbstract *_operational_client_array[MAXIMUM_OPERATIONAL_CLIENTS];
 	uint8_t _operational_clients_in_use = 0;
-////////////////////////////////////////////////////////////////////////
 };
 
 #endif

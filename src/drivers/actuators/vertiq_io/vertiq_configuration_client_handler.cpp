@@ -91,20 +91,15 @@ void VertiqConfigurationClilentHandler::UpdateClientsToNewObjId(uint8_t new_obje
 {
 	_object_id_now = new_object_id;
 
-	delete _prop_input_parser_client;
-	_prop_input_parser_client = new EscPropellerInputParserClient(new_object_id);
+	DestroyAndRecreateClient<EscPropellerInputParserClient>(_prop_input_parser_client, new_object_id);
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
-	delete _ifci_client;
-	_ifci_client = new IQUartFlightControllerInterfaceClient(new_object_id);
+	DestroyAndRecreateClient<IQUartFlightControllerInterfaceClient>(_ifci_client, new_object_id);
 #endif
 
 #ifdef CONFIG_USE_PULSING_CONFIGURATION
-	delete _voltage_superposition_client;
-	_voltage_superposition_client = new VoltageSuperPositionClient(new_object_id);
-
-	delete _pulsing_rectangular_input_parser_client;
-	_pulsing_rectangular_input_parser_client = new PulsingRectangularInputParserClient(new_object_id);
+	DestroyAndRecreateClient<VoltageSuperPositionClient>(_voltage_superposition_client, new_object_id);
+	DestroyAndRecreateClient<PulsingRectangularInputParserClient>(_pulsing_rectangular_input_parser_client, new_object_id);
 #endif
 }
 

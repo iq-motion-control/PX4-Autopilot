@@ -41,7 +41,7 @@ VertiqIo::VertiqIo() :
 	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default),
 	_serial_interface(),
 	_client_manager(&_serial_interface),
-	_telem_manager(&_operational_ifci),
+	_telem_manager(&_operational_ifci, &_client_manager),
 	_broadcast_prop_motor_control(_kBroadcastID),
 	_broadcast_arming_handler(_kBroadcastID),
 	_operational_ifci(_kBroadcastID)
@@ -78,7 +78,7 @@ bool VertiqIo::init()
 #endif
 
 	//Initialize our telemetry handler
-	_telem_manager.Init(_telem_bitmask, _client_manager._configuration_client_handler.GetTelemIFCI());
+	_telem_manager.Init(_telem_bitmask);
 	_telem_manager.StartPublishing(&_esc_status_pub);
 
 	//Make sure we get our thread into execution
