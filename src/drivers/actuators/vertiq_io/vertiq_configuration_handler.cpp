@@ -57,6 +57,10 @@ void VertiqConfigurationHandler::InitConfigurationClients(uint8_t object_id)
 	_pulsing_rectangular_input_parser_client = new PulsingRectangularInputParserClient(object_id);
 	_client_manager->AddNewClient(_pulsing_rectangular_input_parser_client);
 #endif //CONFIG_USE_PULSING_CONFIGURATION
+
+//USER ADDED
+	_arming_handler = new ArmingHandlerClient(object_id);
+	_client_manager->AddNewClient(_arming_handler);
 }
 
 void VertiqConfigurationHandler::InitClientEntryWrappers(){
@@ -83,6 +87,10 @@ void VertiqConfigurationHandler::InitClientEntryWrappers(){
 	AddNewClientEntry<float, float>(param_find("PULSE_VOLT_LIM"),
 						&(_pulsing_rectangular_input_parser_client->pulsing_voltage_limit_));
 #endif //CONFIG_USE_PULSING_CONFIGURATION
+
+//USER ADDED
+	AddNewClientEntry<float, float>(param_find("ARM_THROT_HIGH"), &(_arming_handler->arm_throttle_upper_limit_));
+	AddNewClientEntry<float, float>(param_find("ARM_THROT_LOW"), &(_arming_handler->arm_throttle_lower_limit_));
 }
 
 void VertiqConfigurationHandler::UpdateClientsToNewObjId(uint8_t new_object_id)
@@ -99,6 +107,9 @@ void VertiqConfigurationHandler::UpdateClientsToNewObjId(uint8_t new_object_id)
 	DestroyAndRecreateClient<VoltageSuperPositionClient>(_voltage_superposition_client, new_object_id);
 	DestroyAndRecreateClient<PulsingRectangularInputParserClient>(_pulsing_rectangular_input_parser_client, new_object_id);
 #endif
+
+//USER ADDED
+	DestroyAndRecreateClient<ArmingHandlerClient>(_arming_handler, new_object_id);
 }
 
 void VertiqConfigurationHandler::MarkConfigurationEntriesForRefresh()
