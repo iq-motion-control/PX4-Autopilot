@@ -55,6 +55,7 @@
 
 enum vertiq_telemetry_pause_states {
 	PAUSED,
+	PAUSE_REQUESTED,
 	UNPAUSED
 };
 
