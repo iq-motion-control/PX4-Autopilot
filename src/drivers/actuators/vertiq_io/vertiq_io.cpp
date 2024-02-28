@@ -42,6 +42,7 @@ VertiqIo::VertiqIo() :
 	_serial_interface(),
 	_client_manager(&_serial_interface),
 	_telem_manager(&_operational_ifci, &_client_manager),
+	_configuration_handler(&_serial_interface, &_client_manager),
 	_broadcast_prop_motor_control(_kBroadcastID),
 	_broadcast_arming_handler(_kBroadcastID),
 	_operational_ifci(_kBroadcastID)
@@ -49,10 +50,12 @@ VertiqIo::VertiqIo() :
 	//Make sure we get the correct initial values for our parameters
 	updateParams();
 
-	_client_manager.Init((uint8_t)_param_vertiq_target_module_id.get());
-	_client_manager.AddNewOperationalClient(&_operational_ifci);
-	_client_manager.AddNewOperationalClient(&_broadcast_arming_handler);
-	_client_manager.AddNewOperationalClient(&_broadcast_prop_motor_control);
+	_configuration_handler.InitConfigurationClients((uint8_t)_param_vertiq_target_module_id.get());
+	_configuration_handler.InitClientEntryWrappers();
+
+	_client_manager.AddNewClient(&_operational_ifci);
+	_client_manager.AddNewClient(&_broadcast_arming_handler);
+	_client_manager.AddNewClient(&_broadcast_prop_motor_control);
 }
 
 VertiqIo::~VertiqIo()
@@ -78,7 +81,7 @@ bool VertiqIo::init()
 #endif
 
 	//Initialize our telemetry handler
-	_telem_manager.Init(_telem_bitmask);
+	_telem_manager.Init(_telem_bitmask, (uint8_t)_param_vertiq_target_module_id.get());
 	_telem_manager.StartPublishing(&_esc_status_pub);
 
 	//Make sure we get our thread into execution
@@ -154,8 +157,8 @@ void VertiqIo::parameters_update()
 		updateParams();
 
 		//If the target module ID changed, we need to update all of our parameters
-		if (_param_vertiq_target_module_id.get() != _client_manager._configuration_client_handler.GetObjectIdNow()) {
-			_client_manager._configuration_client_handler.UpdateClientsToNewObjId(_param_vertiq_target_module_id.get());
+		if (_param_vertiq_target_module_id.get() != _configuration_handler.GetObjectIdNow()) {
+			_configuration_handler.UpdateClientsToNewObjId(_param_vertiq_target_module_id.get());
 
 			//Make sure we start a new read!
 			_param_vertiq_trigger_read.set(true);
@@ -164,12 +167,12 @@ void VertiqIo::parameters_update()
 
 		//If you're set to re-read from the motor, mark all of the IQUART parameters for reinitialization, reset the trigger, and then update the IFCI params
 		if (_param_vertiq_trigger_read.get()) {
-			_client_manager._configuration_client_handler.MarkConfigurationEntriesForRefresh();
+			_configuration_handler.MarkConfigurationEntriesForRefresh();
 			_param_vertiq_trigger_read.set(false);
 			_param_vertiq_trigger_read.commit_no_notification();
 		}
 
-		_client_manager._configuration_client_handler.UpdateIquartConfigParams();
+		_configuration_handler.UpdateIquartConfigParams();
 	}
 }
 

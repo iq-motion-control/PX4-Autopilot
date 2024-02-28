@@ -68,8 +68,8 @@ px4_add_module(
 		vertiq_telemetry_manager.hpp
 		vertiq_client_manager.cpp
 		vertiq_client_manager.hpp
-		vertiq_configuration_client_handler.cpp
-		vertiq_configuration_client_handler.hpp
+		vertiq_configuration_handler.cpp
+		vertiq_configuration_handler.hpp
 		entry_wrapper.hpp
 	DEPENDS
 		px4_work_queue

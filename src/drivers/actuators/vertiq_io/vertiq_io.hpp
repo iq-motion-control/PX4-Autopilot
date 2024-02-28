@@ -50,6 +50,7 @@
 #include "vertiq_telemetry_manager.hpp"
 #include "vertiq_client_manager.hpp"
 #include "vertiq_serial_interface.hpp"
+#include "vertiq_configuration_handler.hpp"
 
 #include "iq-module-communication-cpp/inc/propeller_motor_control_client.hpp"
 #include "iq-module-communication-cpp/inc/brushless_drive_client.hpp"
@@ -130,6 +131,7 @@ private:
 	VertiqSerialInterface _serial_interface; //We need a serial handler in order to talk over the serial port
 	VertiqClientManager _client_manager; //We need someone who can manage our clients
 	VertiqTelemetryManager _telem_manager; //We need a telemetry handler
+	VertiqConfigurationHandler _configuration_handler;
 
 ////////////////////////////////////////////////////////////////////////
 //Vertiq client information

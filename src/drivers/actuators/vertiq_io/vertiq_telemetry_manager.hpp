@@ -74,8 +74,9 @@ public:
 	* @brief Initialize the telemetry manager with the bitmask set in the PX4 parameters
 	* @param telem_bitmask The bitmask set in the PX4 parameters as VERTIQ_TEL_MSK
 	* @param telem_interface A pointer to the IFCI client we will use for telemetry
+	* @param module_id The target module ID at the time of init
 	*/
-	void Init(uint64_t telem_bitmask);
+	void Init(uint64_t telem_bitmask, uint8_t module_id);
 
 	/**
 	* @brief Start publishing the ESC statuses to the uORB esc_status topic

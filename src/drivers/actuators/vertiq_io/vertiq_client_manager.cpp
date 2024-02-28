@@ -33,15 +33,8 @@
 #include "vertiq_client_manager.hpp"
 
 VertiqClientManager::VertiqClientManager(VertiqSerialInterface *serial_interface) :
-	_configuration_client_handler(serial_interface),
 	_serial_interface(serial_interface)
 {
-}
-
-void VertiqClientManager::Init(uint8_t object_id)
-{
-	_configuration_client_handler.InitConfigurationClients(object_id);
-	_configuration_client_handler.InitClientEntryWrappers();
 }
 
 void VertiqClientManager::HandleClientCommunication()
@@ -52,18 +45,18 @@ void VertiqClientManager::HandleClientCommunication()
 	_serial_interface->process_serial_tx();
 
 	//Update our serial rx for all clients
-	_serial_interface->process_serial_rx_for_all(_operational_client_array, _operational_clients_in_use, _configuration_client_handler.GetClientArray(), _configuration_client_handler.GetNumberOfConfigurationClients());
+	_serial_interface->process_serial_rx(_client_array, _clients_in_use);
 }
 
-void VertiqClientManager::AddNewOperationalClient(ClientAbstract * client){
-	if(_operational_clients_in_use < MAXIMUM_OPERATIONAL_CLIENTS){
-		_operational_client_array[_operational_clients_in_use] = client;
-		_operational_clients_in_use++;
+void VertiqClientManager::AddNewClient(ClientAbstract * client){
+	if(_clients_in_use < MAXIMUM_NUMBER_OF_CLIENTS){
+		_client_array[_clients_in_use] = client;
+		_clients_in_use++;
 	}else{
 		PX4_INFO("Could not add this client. Maximum number exceeded");
 	}
 }
 
 uint8_t VertiqClientManager::GetNumberOfOperationalClients(){
-	return _operational_clients_in_use;
+	return _clients_in_use;
 }

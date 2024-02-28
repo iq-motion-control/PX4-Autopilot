@@ -42,6 +42,7 @@
 #include <lib/mixer_module/mixer_module.hpp>
 
 #include "entry_wrapper.hpp"
+#include "vertiq_client_manager.hpp"
 #include "iq-module-communication-cpp/inc/esc_propeller_input_parser_client.hpp"
 
 #include "iq-module-communication-cpp/inc/arming_handler_client.hpp"
@@ -52,10 +53,10 @@
 #include "iq-module-communication-cpp/inc/pulsing_rectangular_input_parser_client.hpp"
 #endif //CONFIG_USE_PULSING_CONFIGURATION
 
-class VertiqConfigurationClilentHandler{
+class VertiqConfigurationHandler{
 public:
 
-	VertiqConfigurationClilentHandler(VertiqSerialInterface * ser);
+	VertiqConfigurationHandler(VertiqSerialInterface * ser, VertiqClientManager * client_manager);
 
 	/**
 	 * @brief Initialize all of our client entry wrappers
@@ -95,40 +96,11 @@ public:
 	void UpdateClientsToNewObjId(uint8_t new_object_id);
 
 	/**
-	* @brief Adds a new client to our array of Configuration Clients. Configurations clients are those meant to interface a configurable module parameter
-	* with a PX4 parameter. These are clients whose module ID will change over time, and will be dynamically updated
-	*
-	* @param client a pointer to the new client
-	*/
-	void AddNewConfigurationClient(ClientAbstract * client);
-
-	/**
-	* @brief Returns the number of clients added to our Configuration Clients array
-	*
-	* @return The value _configuration_clients_in_use
-	*/
-	uint8_t GetNumberOfConfigurationClients();
-
-	/**
 	* @brief Initialize all of the Vertiq Clients that we want to use
 	*
 	* @param object_id The object ID with which to initialize our clients
 	*/
 	void InitConfigurationClients(uint8_t object_id);
-
-	/**
-	* @brief Returns a pointer to our IFCI client used for telemetry
-	*
-	* @return The _telem_ifci pointer
-	*/
-	IQUartFlightControllerInterfaceClient *GetTelemIFCI();
-
-	/**
-	 * @brief Get the Client Array object
-	 *
-	 * @return ClientAbstract*
-	 */
-	ClientAbstract **GetClientArray();
 
 	/**
 	 * @brief Delete and recreate a client with a new object ID
@@ -164,17 +136,11 @@ private:
 
 	uint8_t _object_id_now; //The object ID we're targeting right now
 	VertiqSerialInterface *_serial_interface; //We need a serial handler in order to talk over the serial port
+	VertiqClientManager * _client_manager;
 
 ////////////////////////////////////////////////////////////////////////
 //Vertiq Client information
-	static const uint8_t MAXIMUM_CONFIGURATION_CLIENTS = 20; //These are clients whose module ID will change when Target Module ID changes
-
-	//Client arrays in order to store all of our Configuration and Operational clients
-	ClientAbstract *_configuration_client_array[MAXIMUM_CONFIGURATION_CLIENTS];
-	uint8_t _configuration_clients_in_use = 0;
-
 	//Known Configuration Clients can be created as pointers to certain types of clients
-	IQUartFlightControllerInterfaceClient *_telem_ifci;
 	EscPropellerInputParserClient *_prop_input_parser_client;
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION

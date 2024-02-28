@@ -193,7 +193,7 @@ uint8_t * VertiqSerialInterface::ReadAndSetRxBytes(){
 	return _rx_buf;
 }
 
-int VertiqSerialInterface::process_serial_rx_for_all(ClientAbstract **operational_client_array, uint8_t number_of_operational_clients, ClientAbstract **config_client_array, uint8_t number_of_config_clients)
+int VertiqSerialInterface::process_serial_rx(ClientAbstract **operational_client_array, uint8_t number_of_operational_clients)
 {
 	//We have bytes
 	if (CheckForRx()) {
@@ -206,11 +206,6 @@ int VertiqSerialInterface::process_serial_rx_for_all(ClientAbstract **operationa
 				operational_client_array[i]->ReadMsg(data_ptr, _bytes_available);
 			}
 
-			for (uint8_t i = 0; i < number_of_config_clients; i++) {
-				config_client_array[i]->ReadMsg(data_ptr, _bytes_available);
-			}
-
-
 			_iquart_interface.DropPacket();
 		}
 
@@ -218,29 +213,6 @@ int VertiqSerialInterface::process_serial_rx_for_all(ClientAbstract **operationa
 
 	return 1;
 }
-
-int VertiqSerialInterface::ProcessSerialRxForConfig(ClientAbstract **config_client_array, uint8_t number_of_config_clients)
-{
-	//We have bytes
-	if (CheckForRx()) {
-		uint8_t *data_ptr = ReadAndSetRxBytes();
-		//While we've got packets to look at, give the packet to each of the clients so that each
-		//can decide what to do with it
-		while (_iquart_interface.PeekPacket(&data_ptr, &_bytes_available) == 1) {
-
-			for (uint8_t i = 0; i < number_of_config_clients; i++) {
-				config_client_array[i]->ReadMsg(data_ptr, _bytes_available);
-			}
-
-
-			_iquart_interface.DropPacket();
-		}
-
-	}
-
-	return 1;
-}
-
 
 int VertiqSerialInterface::process_serial_tx()
 {

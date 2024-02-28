@@ -30,38 +30,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-#include "vertiq_configuration_client_handler.hpp"
+#include "vertiq_configuration_handler.hpp"
 
-VertiqConfigurationClilentHandler::VertiqConfigurationClilentHandler(VertiqSerialInterface * ser) :
-	_serial_interface(ser)
+VertiqConfigurationHandler::VertiqConfigurationHandler(VertiqSerialInterface * ser, VertiqClientManager * client_manager) :
+	_serial_interface(ser),
+	_client_manager(client_manager)
 {
 }
 
-void VertiqConfigurationClilentHandler::InitConfigurationClients(uint8_t object_id)
+void VertiqConfigurationHandler::InitConfigurationClients(uint8_t object_id)
 {
 	_object_id_now = object_id; //Make sure we store the initial object ID
 
-	_telem_ifci = new IQUartFlightControllerInterfaceClient(object_id);
-	AddNewConfigurationClient(_telem_ifci);
-
 	_prop_input_parser_client = new EscPropellerInputParserClient(object_id);
-	AddNewConfigurationClient(_prop_input_parser_client);
+	_client_manager->AddNewClient(_prop_input_parser_client);
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
 	_ifci_client = new IQUartFlightControllerInterfaceClient(object_id);
-	AddNewConfigurationClient(_ifci_client);
+	_client_manager->AddNewClient(_ifci_client);
 #endif //CONFIG_USE_IFCI_CONFIGURATION
 
 #ifdef CONFIG_USE_PULSING_CONFIGURATION
 	_voltage_superposition_client = new VoltageSuperPositionClient(object_id);
-	AddNewConfigurationClient(_voltage_superposition_client);
+	_client_manager->AddNewClient(_voltage_superposition_client);
 
 	_pulsing_rectangular_input_parser_client = new PulsingRectangularInputParserClient(object_id);
-	AddNewConfigurationClient(_pulsing_rectangular_input_parser_client);
+	_client_manager->AddNewClient(_pulsing_rectangular_input_parser_client);
 #endif //CONFIG_USE_PULSING_CONFIGURATION
 }
 
-void VertiqConfigurationClilentHandler::InitClientEntryWrappers(){
+void VertiqConfigurationHandler::InitClientEntryWrappers(){
 	AddNewClientEntry<float, float>(param_find("MAX_VELOCITY"), &(_prop_input_parser_client->velocity_max_));
 	AddNewClientEntry<float, float>(param_find("MAX_VOLTS"), &(_prop_input_parser_client->volts_max_));
 	AddNewClientEntry<uint8_t, int32_t>(param_find("CONTROL_MODE"), &(_prop_input_parser_client->mode_));
@@ -87,7 +85,7 @@ void VertiqConfigurationClilentHandler::InitClientEntryWrappers(){
 #endif //CONFIG_USE_PULSING_CONFIGURATION
 }
 
-void VertiqConfigurationClilentHandler::UpdateClientsToNewObjId(uint8_t new_object_id)
+void VertiqConfigurationHandler::UpdateClientsToNewObjId(uint8_t new_object_id)
 {
 	_object_id_now = new_object_id;
 
@@ -103,14 +101,14 @@ void VertiqConfigurationClilentHandler::UpdateClientsToNewObjId(uint8_t new_obje
 #endif
 }
 
-void VertiqConfigurationClilentHandler::MarkConfigurationEntriesForRefresh()
+void VertiqConfigurationHandler::MarkConfigurationEntriesForRefresh()
 {
 	for (uint8_t i = 0; i < _added_configuration_entry_wrappers; i++) {
 		_configuration_entry_wrappers[i]->SetNeedsInit();
 	}
 }
 
-void VertiqConfigurationClilentHandler::UpdateIquartConfigParams()
+void VertiqConfigurationHandler::UpdateIquartConfigParams()
 {
 	for (uint8_t i = 0; i < _added_configuration_entry_wrappers; i++) {
 		_configuration_entry_wrappers[i]->SendGet(_serial_interface);
@@ -122,7 +120,7 @@ void VertiqConfigurationClilentHandler::UpdateIquartConfigParams()
 	CoordinateIquartWithPx4Params();
 }
 
-void VertiqConfigurationClilentHandler::CoordinateIquartWithPx4Params(hrt_abstime timeout)
+void VertiqConfigurationHandler::CoordinateIquartWithPx4Params(hrt_abstime timeout)
 {
 	//Get the start time and the end time
 	hrt_abstime time_now = hrt_absolute_time();
@@ -137,32 +135,10 @@ void VertiqConfigurationClilentHandler::CoordinateIquartWithPx4Params(hrt_abstim
 		time_now = hrt_absolute_time();
 
 		//Update our serial rx
-		_serial_interface->ProcessSerialRxForConfig(_configuration_client_array, _configuration_clients_in_use);
+		_client_manager->HandleClientCommunication();
 	}
 }
 
-ClientAbstract **VertiqConfigurationClilentHandler::GetClientArray()
-{
-	return _configuration_client_array;
-}
-
-void VertiqConfigurationClilentHandler::AddNewConfigurationClient(ClientAbstract * client){
-	if(_configuration_clients_in_use < MAXIMUM_CONFIGURATION_CLIENTS){
-		_configuration_client_array[_configuration_clients_in_use] = client;
-		_configuration_clients_in_use++;
-	}else{
-		PX4_INFO("Could not add this client. Maximum number exceeded");
-	}
-}
-
-uint8_t VertiqConfigurationClilentHandler::GetNumberOfConfigurationClients(){
-	return _configuration_clients_in_use;
-}
-
-IQUartFlightControllerInterfaceClient *VertiqConfigurationClilentHandler::GetTelemIFCI(){
-	return _telem_ifci;
-}
-
-uint8_t VertiqConfigurationClilentHandler::GetObjectIdNow(){
+uint8_t VertiqConfigurationHandler::GetObjectIdNow(){
 	return _object_id_now;
 }

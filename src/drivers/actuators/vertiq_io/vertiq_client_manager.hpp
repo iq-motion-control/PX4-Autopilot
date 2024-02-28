@@ -45,9 +45,6 @@
 
 #include "vertiq_serial_interface.hpp"
 
-#include "entry_wrapper.hpp"
-#include "vertiq_configuration_client_handler.hpp"
-
 static const uint8_t _kBroadcastID = 63;
 
 class VertiqClientManager
@@ -61,11 +58,6 @@ public:
 	VertiqClientManager(VertiqSerialInterface *serial_interface);
 
 	/**
-	* @brief Initialize all of our clients with the object ID given by the PX4 parameter TARGET_MODULE_ID
-	*/
-	void Init(uint8_t object_id);
-
-	/**
 	* @brief Handle the IQUART interface. Make sure that we update TX and RX buffers
 	*/
 	void HandleClientCommunication();
@@ -74,25 +66,23 @@ public:
 	* @brief Adds a new client to our array of Operational Clients. Operational clients are those meant to hold an operational client such as those used
 	* for direct motor control. Operational clients should have a constant module ID, and should be made only once
 	*/
-	void AddNewOperationalClient(ClientAbstract * client);
+	void AddNewClient(ClientAbstract * client);
 
 	/**
 	* @brief Returns the number of clients added to our Operational Clients array
 	*
-	* @return The value _operational_clients_in_use
+	* @return The value _clients_in_use
 	*/
 	uint8_t GetNumberOfOperationalClients();
-
-	VertiqConfigurationClilentHandler _configuration_client_handler;
 
 private:
 	//We need a serial handler in order to talk over the serial port
 	VertiqSerialInterface *_serial_interface;
 
 	//Some constants to help us out
-	static const uint8_t MAXIMUM_OPERATIONAL_CLIENTS = 20; //These are clients that are used for module control/telemetry. They have a static Module ID
-	ClientAbstract *_operational_client_array[MAXIMUM_OPERATIONAL_CLIENTS];
-	uint8_t _operational_clients_in_use = 0;
+	static const uint8_t MAXIMUM_NUMBER_OF_CLIENTS = 20; //These are clients that are used for module control/telemetry. They have a static Module ID
+	ClientAbstract *_client_array[MAXIMUM_NUMBER_OF_CLIENTS];
+	uint8_t _clients_in_use = 0;
 };
 
 #endif

@@ -40,14 +40,14 @@ VertiqTelemetryManager::VertiqTelemetryManager(IQUartFlightControllerInterfaceCl
 {
 }
 
-void VertiqTelemetryManager::Init(uint64_t telem_bitmask)
+void VertiqTelemetryManager::Init(uint64_t telem_bitmask, uint8_t module_id)
 {
 	//On init, make sure to set our bitmask, and then go ahead and find the front and back 1s
 	_telem_bitmask = telem_bitmask;
 	FindTelemetryModuleIds();
 
-	_telem_interface = new IQUartFlightControllerInterfaceClient(_client_manager->_configuration_client_handler.GetObjectIdNow());
-	_client_manager->_configuration_client_handler.AddNewConfigurationClient(_telem_interface);
+	_telem_interface = new IQUartFlightControllerInterfaceClient(module_id);
+	_client_manager->AddNewClient(_telem_interface);
 }
 
 void VertiqTelemetryManager::FindTelemetryModuleIds()
@@ -138,7 +138,8 @@ uint16_t VertiqTelemetryManager::UpdateTelemetry()
 
 		if(next_telem != _impossible_module_id){
 			//We need to update the module ID we're going to listen to. So, kill the old one, and make it anew.
-			_client_manager->_configuration_client_handler.DestroyAndRecreateClient<IQUartFlightControllerInterfaceClient>(_telem_interface, next_telem);
+			delete _telem_interface;
+			_telem_interface = new IQUartFlightControllerInterfaceClient(next_telem);
 		}
 
 		//update the telem target
