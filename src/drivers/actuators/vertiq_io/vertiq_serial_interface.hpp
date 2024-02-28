@@ -65,10 +65,21 @@ public:
 	*/
 	int configure_serial_peripheral(unsigned baud);
 
+	bool CheckForRx();
+
+	uint8_t *ReadAndSetRxBytes();
+
 	/**
-	* @brief check to see if there is any data for us coming in over the serial port
+	* @brief check to see if there is any data for us coming in over the serial port. We check both our operational and configurational clients
+	* in order to make sure everyone has a chance to read each packet before it gets thrown away
 	*/
-	int process_serial_rx(ClientAbstract **configuration_clients, ClientAbstract **operational_clients);
+	int process_serial_rx_for_all(ClientAbstract **operational_client_array, uint8_t number_of_operational_clients, ClientAbstract **config_client_array, uint8_t number_of_config_clients);
+
+	/**
+	* @brief check to see if there is any data for us coming in over the serial port for only the configuration clients. We check both our operational and configurational clients
+	* in order to make sure everyone has a chance to read each packet before it gets thrown away
+	*/
+	int ProcessSerialRxForConfig(ClientAbstract **config_client_array, uint8_t number_of_config_clients);
 
 	/**
 	* @brief check to see if there is any data that we need to transmit over serial
@@ -81,22 +92,7 @@ public:
 	*/
 	GenericInterface *get_iquart_interface();
 
-	/**
-	* @brief Sets the _number_of_configuration_clients parameter to number_of_clients
-	* @param number_of_clients the new number of configuration clients we have
-	*/
-	void SetNumberOfConfigurationClients(uint8_t number_of_clients);
-
-	/**
-	* @brief Sets the _number_of_operational_clients parameter to number_of_clients
-	* @param number_of_clients the new number of operational clients we have
-	*/
-	void SetNumberOfOperationalClients(uint8_t number_of_clients);
-
 private:
-	uint8_t _number_of_configuration_clients;
-	uint8_t _number_of_operational_clients;
-
 	GenericInterface _iquart_interface;
 
 	uint8_t _bytes_available;

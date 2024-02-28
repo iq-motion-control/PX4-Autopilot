@@ -56,6 +56,8 @@ enum vertiq_telemetry_pause_states {
 	UNPAUSED
 };
 
+static const uint8_t _impossible_module_id = 255;
+
 class VertiqTelemetryManager
 {
 public:
@@ -117,38 +119,21 @@ public:
 
 private:
 
-	vertiq_telemetry_pause_states _telem_state;
-
-	//Used for broadcasting our commands
-	IQUartFlightControllerInterfaceClient *_motor_interface;
-
-	//Used for reading responses from our telemetry targets
-	IQUartFlightControllerInterfaceClient *_telem_interface;
-
-	//We want to publish our ESC Status to anyone who will listen
-	esc_status_s		_esc_status;
-
-	//The max number of module IDs that we can support
-	static const uint8_t MAX_SUPPORTABLE_MODULE_IDS = 63; //[0, 62]
-
-	//The max number of esc status entries we can keep track of (per the esc_status_s type)
-	static const uint8_t MAX_ESC_STATUS_ENTRIES = 8;
+	vertiq_telemetry_pause_states _telem_state; //Keep track of whether or not we've paused telemetry
+	IQUartFlightControllerInterfaceClient *_motor_interface; //Used for broadcasting our commands
+	IQUartFlightControllerInterfaceClient *_telem_interface; //Used for reading responses from our telemetry targets
+	esc_status_s		_esc_status; //We want to publish our ESC Status to anyone who will listen
+	static const uint8_t MAX_SUPPORTABLE_MODULE_IDS = 63; //[0, 62] //The max number of module IDs that we can support
+	static const uint8_t MAX_ESC_STATUS_ENTRIES = 8; //The max number of esc status entries we can keep track of (per the esc_status_s type)
 
 	//We need a way to store the module IDs that we're supposed to ask for telemetry from. We can have as many as 63.
 	uint8_t _module_ids_in_use[MAX_ESC_STATUS_ENTRIES];
 	uint8_t _number_of_module_ids_for_telem = 0;
 	uint8_t _current_module_id_target_index = 0;
 
-	//Store the telemetry bitmask for who we want to get telemetry from
-	uint64_t _telem_bitmask = 0;
-
-	//The amount of time (in ms) that we'll wait for a telemetry response
-	static const hrt_abstime _telem_timeout = 50_ms;
-
-	//The system time the last time that we got telemetry
-	hrt_abstime _time_of_last_telem_request = 0;
-
-	static const uint8_t _impossible_module_id = 255;
+	uint64_t _telem_bitmask = 0; //Store the telemetry bitmask for who we want to get telemetry from
+	static const hrt_abstime _telem_timeout = 50_ms; //The amount of time (in ms) that we'll wait for a telemetry response
+	hrt_abstime _time_of_last_telem_request = 0; //The system time the last time that we got telemetry
 };
 
 #endif
