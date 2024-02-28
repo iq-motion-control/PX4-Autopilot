@@ -124,10 +124,13 @@ private:
 	VertiqClientManager _client_manager; //We need someone who can manage our clients
 	VertiqTelemetryManager _telem_manager; //We need a telemetry handler
 
-	static const uint16_t MAX_IFCI_MESSAGE = 40; //Up to 16 2 byte commands, one telemetry byte, plus 7 IQUART added bytes
+	//Known Operational Clients can be created as concrete objects
+	PropellerMotorControlClient _broadcast_prop_motor_control;
+	ArmingHandlerClient _broadcast_arming_handler;
 
 	IQUartFlightControllerInterfaceClient _operational_ifci;
 	IFCIPackedMessage _transmission_message;
+	static const uint16_t MAX_IFCI_MESSAGE = 40; //Up to 16 2 byte commands, one telemetry byte, plus 7 IQUART added bytes
 	uint8_t _output_message[MAX_IFCI_MESSAGE];
 	uint8_t _output_len;
 

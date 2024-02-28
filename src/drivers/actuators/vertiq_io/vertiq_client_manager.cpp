@@ -34,12 +34,8 @@
 
 VertiqClientManager::VertiqClientManager(VertiqSerialInterface *serial_interface) :
 	_configuration_client_handler(serial_interface),
-	_serial_interface(serial_interface),
-	_broadcast_prop_motor_control(_kBroadcastID), //Initialize with a module ID of 63 for broadcasting
-	_broadcast_arming_handler(_kBroadcastID)
+	_serial_interface(serial_interface)
 {
-	AddNewOperationalClient(&_broadcast_prop_motor_control);
-	AddNewOperationalClient(&_broadcast_arming_handler);
 }
 
 void VertiqClientManager::Init(uint8_t object_id)
@@ -55,28 +51,8 @@ void VertiqClientManager::HandleClientCommunication()
 	//Update our serial tx before we take in the rx
 	_serial_interface->process_serial_tx();
 
-	//Update our serial rx
+	//Update our serial rx for all clients
 	_serial_interface->process_serial_rx_for_all(_operational_client_array, _operational_clients_in_use, _configuration_client_handler.GetClientArray(), _configuration_client_handler.GetNumberOfConfigurationClients());
-}
-
-void VertiqClientManager::SendSetForceArm()
-{
-	_broadcast_arming_handler.motor_armed_.set(*_serial_interface->get_iquart_interface(), 1);
-}
-
-void VertiqClientManager::SendSetForceDisarm()
-{
-	_broadcast_arming_handler.motor_armed_.set(*_serial_interface->get_iquart_interface(), 0);
-}
-
-void VertiqClientManager::SendSetCoast()
-{
-	_broadcast_prop_motor_control.ctrl_coast_.set(*_serial_interface->get_iquart_interface());
-}
-
-void VertiqClientManager::SendSetVelocitySetpoint(uint16_t velocity_setpoint)
-{
-	_broadcast_prop_motor_control.ctrl_velocity_.set(*_serial_interface->get_iquart_interface(), velocity_setpoint);
 }
 
 void VertiqClientManager::AddNewOperationalClient(ClientAbstract * client){

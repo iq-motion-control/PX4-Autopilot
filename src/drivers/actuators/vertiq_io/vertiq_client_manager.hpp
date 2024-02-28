@@ -83,28 +83,6 @@ public:
 	void HandleClientCommunication();
 
 	/**
-	* @brief Add a set to the output buffer that will force the connected motor to arm
-	*/
-	void SendSetForceArm();
-
-	/**
-	* @brief Add a set to the output buffer that will force the connected motor to disarm
-	*/
-	void SendSetForceDisarm();
-
-	/**
-	* @brief Add a set to the output buffer that will force the connected motor to coast
-	*/
-	void SendSetCoast();
-
-	/**
-	* @brief Add a set to the output buffer that will force the connected motor to spin at a given setpoint
-	*
-	* @param velocity_setpoint the raw 16-bit velocity command going to the motor
-	*/
-	void SendSetVelocitySetpoint(uint16_t velocity_setpoint);
-
-	/**
 	* @brief Adds a new client to our array of Operational Clients. Operational clients are those meant to hold an operational client such as those used
 	* for direct motor control. Operational clients should have a constant module ID, and should be made only once
 	*/
@@ -144,11 +122,6 @@ You can find the C++ representation in ./src/drivers/actuators/vertiq_io/iq-modu
 	static const uint8_t MAXIMUM_OPERATIONAL_CLIENTS = 20; //These are clients that are used for module control/telemetry. They have a static Module ID
 	ClientAbstract *_operational_client_array[MAXIMUM_OPERATIONAL_CLIENTS];
 	uint8_t _operational_clients_in_use = 0;
-
-	//Known Operational Clients can be created as concrete objects
-	PropellerMotorControlClient _broadcast_prop_motor_control;
-	ArmingHandlerClient _broadcast_arming_handler;
-
 ////////////////////////////////////////////////////////////////////////
 };
 

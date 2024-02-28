@@ -42,6 +42,8 @@ VertiqIo::VertiqIo() :
 	_serial_interface(),
 	_client_manager(&_serial_interface),
 	_telem_manager(&_operational_ifci),
+	_broadcast_prop_motor_control(_kBroadcastID),
+	_broadcast_arming_handler(_kBroadcastID),
 	_operational_ifci(_kBroadcastID)
 {
 	//Make sure we get the correct initial values for our parameters
@@ -49,6 +51,8 @@ VertiqIo::VertiqIo() :
 
 	_client_manager.Init((uint8_t)_param_vertiq_target_module_id.get());
 	_client_manager.AddNewOperationalClient(&_operational_ifci);
+	_client_manager.AddNewOperationalClient(&_broadcast_arming_handler);
+	_client_manager.AddNewOperationalClient(&_broadcast_prop_motor_control);
 }
 
 VertiqIo::~VertiqIo()
@@ -188,7 +192,7 @@ bool VertiqIo::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS], 
 	if (_mixing_output.armed().armed) {
 
 		if (_param_vertiq_arm_behavior.get() == FORCE_ARMING && _send_forced_arm) {
-			_client_manager.SendSetForceArm();
+			_broadcast_arming_handler.motor_armed_.set(*_serial_interface.get_iquart_interface(), 1);
 			_send_forced_arm = false;
 		}
 
@@ -205,15 +209,15 @@ bool VertiqIo::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS], 
 		//Put the modules into coast
 		switch (_param_vertiq_disarm_behavior.get()) {
 		case TRIGGER_MOTOR_DISARM:
-			_client_manager.SendSetForceDisarm();
+			_broadcast_arming_handler.motor_armed_.set(*_serial_interface.get_iquart_interface(), 0);
 			break;
 
 		case COAST_MOTOR:
-			_client_manager.SendSetCoast();
+			_broadcast_prop_motor_control.ctrl_coast_.set(*_serial_interface.get_iquart_interface());
 			break;
 
 		case SEND_PREDEFINED_THROTTLE:
-			_client_manager.SendSetVelocitySetpoint(_param_vertiq_disarm_throttle.get());
+			_broadcast_prop_motor_control.ctrl_velocity_.set(*_serial_interface.get_iquart_interface(), _param_vertiq_disarm_throttle.get());
 			break;
 
 		default:
