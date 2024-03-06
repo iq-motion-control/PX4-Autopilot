@@ -76,6 +76,9 @@
 	path = src/lib/heatshrink/heatshrink
 	url = https://github.com/PX4/heatshrink.git
 	branch = px4
+[submodule "src/drivers/actuators/vertiq_io/iq-module-communication-cpp"]
+	path = src/drivers/actuators/vertiq_io/iq-module-communication-cpp
+	url = git@github.com:iq-motion-control/iq-module-communication-cpp.git
 [submodule "Tools/simulation/gz"]
 	path = Tools/simulation/gz
 	url = https://github.com/PX4/PX4-gazebo-models.git
