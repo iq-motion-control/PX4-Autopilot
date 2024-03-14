@@ -116,13 +116,15 @@ public:
 	 * @brief Delete and recreate a client with a new object ID
 	 *
 	 * @tparam client_type The actual type of Client you want to delete and remake
-	 * @param client A pointer to the client being deleted
-	 * @param object_id The object we're making the new client with
+	 * @param client A pointer ref to the client being deleted
+	 * @param object_id The object id we're making the new client with
 	 */
 	template <typename client_type>
-	void DestroyAndRecreateClient(client_type * client, uint8_t object_id){
-		delete client;
-		client = new client_type(object_id);
+	inline void DestroyAndRecreateClient(client_type*& client, uint8_t object_id) {
+		if (client) {
+			delete client;
+			client = new client_type(object_id);
+		}
 	}
 
 	/**
