@@ -100,7 +100,7 @@ if [ "$GPS" != "NONE" ]; then
 fi
 
 # Auto detect an ncp5623c i2c RGB LED. If one isn't connected this will
-# fail but not cause any harm. 
+# fail but not cause any harm.
 /bin/echo "Looking for ncp5623c RGB LED"
 qshell rgbled_ncp5623c start -X -b 1 -f 400 -a 56
 
@@ -113,6 +113,10 @@ param touch SYS_AUTOCONFIG
 if [ "$ESC" == "VOXL_ESC" ]; then
     /bin/echo "Starting VOXL ESC driver"
 	qshell voxl_esc start
+elif [ "$ESC" == "VERTIQ_IFCI" ]; then
+	/bin/echo "Starting VERTIQ ESC driver"
+	qshell vertiq_io iquart_port 2
+	qshell vertiq_io start
 elif [ "$ESC" == "VOXL2_IO_PWM_ESC" ]; then
 	if [ "$RC" == "M0065_SBUS" ]; then
 		/bin/echo "Starting VOXL IO for PWM ESC with SBUS RC"
