@@ -254,7 +254,7 @@ if(EXISTS ${BOARD_DEFCONFIG})
 	set(romfs_extra_files)
 	set(config_romfs_extra_dependencies)
 	# additional embedded metadata
-	if(NOT CONSTRAINED_FLASH AND NOT EXTERNAL_METADATA AND NOT ${PX4_BOARD_LABEL} STREQUAL "test")
+	# if(NOT CONSTRAINED_FLASH AND NOT EXTERNAL_METADATA AND NOT ${PX4_BOARD_LABEL} STREQUAL "test")
 		list(APPEND romfs_extra_files
 			${PX4_BINARY_DIR}/parameters.json.xz
 			${PX4_BINARY_DIR}/events/all_events.json.xz
@@ -265,7 +265,7 @@ if(EXISTS ${BOARD_DEFCONFIG})
 			events_json
 			actuators_json
 			)
-	endif()
+	# endif()
 	list(APPEND romfs_extra_files ${PX4_BINARY_DIR}/component_general.json.xz)
 	list(APPEND romfs_extra_dependencies component_general_json)
 	set(config_romfs_extra_files ${romfs_extra_files} CACHE INTERNAL "extra ROMFS files" FORCE)
