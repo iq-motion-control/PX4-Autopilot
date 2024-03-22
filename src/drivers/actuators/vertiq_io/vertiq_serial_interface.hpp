@@ -39,6 +39,11 @@
 #include <termios.h>
 #include <errno.h>
 
+#ifdef __PX4_QURT
+#include <drivers/device/qurt/uart.h>
+#define FAR
+#endif
+
 #include "iq-module-communication-cpp/inc/generic_interface.hpp"
 #include "iq-module-communication-cpp/inc/propeller_motor_control_client.hpp"
 

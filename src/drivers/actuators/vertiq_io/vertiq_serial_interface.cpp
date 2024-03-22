@@ -38,7 +38,9 @@ VertiqSerialInterface::VertiqSerialInterface()
 void VertiqSerialInterface::DeinitSerial()
 {
 	if (_uart_fd >= 0) {
+#ifndef __PX4_QURT
 		close(_uart_fd);
+#endif
 		_uart_fd = -1;
 	}
 }
@@ -47,10 +49,12 @@ int VertiqSerialInterface::InitSerial(const char *uart_device, unsigned baud)
 {
 	//Make sure we're starting clean
 	DeinitSerial();
-
+#ifdef __PX4_QURT
+	_uart_fd = qurt_uart_open(uart_device, baud);
+#else
 	//Open up the port with read/write permissions and O_NOCTTY which is, "/* Required by POSIX */"
 	_uart_fd = ::open(uart_device, O_RDWR | O_NOCTTY);
-
+#endif
 	if (_uart_fd < 0) {
 		PX4_ERR("failed to open serial port: %s err: %d", uart_device, errno);
 		return -errno;
@@ -64,6 +68,7 @@ int VertiqSerialInterface::InitSerial(const char *uart_device, unsigned baud)
 
 int VertiqSerialInterface::ConfigureSerialPeripheral(unsigned baud)
 {
+#ifndef __PX4_QURT
 	int speed;
 
 	switch (baud) {
@@ -163,7 +168,8 @@ int VertiqSerialInterface::ConfigureSerialPeripheral(unsigned baud)
 	if ((termios_state = tcsetattr(_uart_fd, TCSANOW, &uart_config)) < 0) {
 		return -errno;
 	}
-
+#endif
+	_speed = baud;
 	return 0;
 }
 
@@ -171,7 +177,7 @@ bool VertiqSerialInterface::CheckForRx(){
 	if (_uart_fd < 0) {
 		return -1;
 	}
-
+#ifndef __PX4_QURT
 	// read from the uart. This must be non-blocking, so check first if there is data available
 	_bytes_available = 0;
 	int ret = ioctl(_uart_fd, FIONREAD, (unsigned long)&_bytes_available);
@@ -180,14 +186,22 @@ bool VertiqSerialInterface::CheckForRx(){
 		PX4_ERR("Reading error");
 		return -1;
 	}
-
+#endif
+#ifdef __PX4_QURT
+#define ASYNC_UART_READ_WAIT_US 2000
+	// The UART read on SLPI is via an asynchronous service so specify a timeout
+	// for the return. The driver will poll periodically until the read comes in
+	// so this may block for a while. However, it will timeout if no read comes in.
+	_bytes_available = qurt_uart_read(_uart_fd, (char *) _rx_buf, sizeof(_rx_buf), ASYNC_UART_READ_WAIT_US);
+#endif
 	return _bytes_available > 0;
 }
 
 uint8_t * VertiqSerialInterface::ReadAndSetRxBytes(){
 	//Read the bytes available for us
+#ifndef __PX4_QURT
 	read(_uart_fd, _rx_buf, _bytes_available);
-
+#endif
 	//Put the data into our IQUART handler
 	_iquart_interface.SetRxBytes(_rx_buf, _bytes_available);
 	return _rx_buf;
@@ -217,7 +231,11 @@ void VertiqSerialInterface::ProcessSerialTx()
 	//while there's stuff to write, write it
 	//Clients are responsible for adding TX messages to the buffer through get/set/save commands
 	while (_iquart_interface.GetTxBytes(_tx_buf, _bytes_available)) {
+#ifdef __PX4_QURT
+		qurt_uart_write(_uart_fd, (const char *) _tx_buf, _bytes_available);
+#else
 		write(_uart_fd, _tx_buf, _bytes_available);
+#endif
 	}
 }
 
