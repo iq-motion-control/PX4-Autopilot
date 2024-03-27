@@ -1,6 +1,7 @@
 __max_num_mc_motors: &max_num_mc_motors 12
 __max_num_servos: &max_num_servos 8
 __max_num_tilts: &max_num_tilts 4
+__max_num_ft: &max_num_ft 8
 
 module_name: Control Allocation
 
@@ -30,6 +31,7 @@ parameters:
                 10: Helicopter (tail ESC)
                 11: Helicopter (tail Servo)
                 12: Helicopter (Coaxial)
+                13: Custom 6DOF
             default: 0
 
         CA_METHOD:
@@ -541,6 +543,132 @@ parameters:
                 1: Remove first failed motor from effectiveness
             default: 0
 
+        # Force Torque
+        CA_FT_COUNT:
+            description:
+                short: Total number of FT
+            type: enum
+            values:
+                0: '0'
+                1: '1'
+                2: '2'
+                3: '3'
+                4: '4'
+                5: '5'
+                6: '6'
+                7: '7'
+                8: '8'
+            default: 0
+        CA_FT${i}_PX:
+            description:
+                short: Position of FT ${i} along X body axis relative to center of gravity
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_ft
+            min: -100
+            max: 100
+            default: 0.0
+        CA_FT${i}_PY:
+            description:
+                short: Position of FT ${i} along Y body axis relative to center of gravity
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_ft
+            min: -100
+            max: 100
+            default: 0.0
+        CA_FT${i}_PZ:
+            description:
+                short: Position of FT ${i} along Z body axis relative to center of gravity
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_ft
+            min: -100
+            max: 100
+            default: 0.0
+
+        CA_FT${i}_AX:
+            description:
+                short: Axis of FT ${i} thrust vector, X body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_ft
+            min: -100
+            max: 100
+            default: 0.0
+        CA_FT${i}_AY:
+            description:
+                short: Axis of FT ${i} thrust vector, Y body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_ft
+            min: -100
+            max: 100
+            default: 0.0
+        CA_FT${i}_AZ:
+            description:
+                short: Axis of FT ${i} thrust vector, Z body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_ft
+            min: -100
+            max: 100
+            default: -1.0
+
+        CA_FT${i}_CT:
+            description:
+                short: Thrust coefficient of FT ${i}
+                long: |
+                  The thrust coefficient if defined as Thrust = CT * u^2,
+                  where u (with value between actuator minimum and maximum)
+                  is the output signal sent to the motor controller.
+            type: float
+            decimal: 1
+            increment: 1
+            num_instances: *max_num_ft
+            min: 0
+            max: 100
+            default: 6.5
+        CA_FT${i}_TRQ_R:
+            description:
+                short: FT ${i} roll torque scaling
+            type: float
+            decimal: 2
+            num_instances: *max_num_ft
+            instance_start: 0
+            default: 0.0
+
+        CA_FT${i}_TRQ_P:
+            description:
+                short: FT ${i} pitch torque scaling
+            type: float
+            decimal: 2
+            num_instances: *max_num_ft
+            instance_start: 0
+            default: 0.0
+
+        CA_FT${i}_TRQ_Y:
+            description:
+                short: FT ${i} yaw torque scaling
+            type: float
+            decimal: 2
+            num_instances: *max_num_ft
+            instance_start: 0
+            default: 0.0
+
+
 # Mixer
 mixer:
     actuator_types:
@@ -571,6 +699,12 @@ mixer:
                 label: 'Slew Rate'
                 index_offset: 0
                 advanced: true
+        ft:
+            functions: 'FT'
+            actuator_testing_values:
+                min: -1
+                max: 1
+                default: 0
         DEFAULT:
             actuator_testing_values:
                 min: -1
@@ -1140,3 +1274,50 @@ mixer:
                     parameters:
                       - label: 'Throttle spoolup time'
                         name: COM_SPOOLUP_TIME
+            13: # Custom 6DOF
+                actuators:
+                  - actuator_type: 'motor'
+                    group_label: 'Thrust/Motors'
+                    count: 'CA_ROTOR_COUNT'
+                    per_item_parameters:
+                        standard:
+                            position: [ 'CA_ROTOR${i}_PX', 'CA_ROTOR${i}_PY', 'CA_ROTOR${i}_PZ' ]
+                        extra:
+                          - name: 'CA_ROTOR${i}_AX'
+                            label: 'Axis X'
+                            function: 'axisx'
+                          - name: 'CA_ROTOR${i}_AY'
+                            label: 'Axis Y'
+                            function: 'axisy'
+                          - name: 'CA_ROTOR${i}_AZ'
+                            label: 'Axis Z'
+                            function: 'axisz'
+                          - name: 'CA_ROTOR${i}_CT'
+                            label: "Thrust\nCoefficient"
+                          - name: 'CA_ROTOR${i}_KM'
+                            label: "Moment\nCoefficient"
+                  - actuator_type: 'servo'
+                    group_label: 'Torque Force'
+                    count: 'CA_FT_COUNT'
+                    item_label_prefix: 'Torque Force ${i}'
+                    per_item_parameters:
+                        standard:
+                            position: [ 'CA_ROTOR${i}_PX', 'CA_ROTOR${i}_PY', 'CA_ROTOR${i}_PZ' ]
+                        extra:
+                          - name: 'CA_FT${i}_AX'
+                            label: 'Axis X'
+                            function: 'axisx'
+                          - name: 'CA_FT${i}_AY'
+                            label: 'Axis Y'
+                            function: 'axisy'
+                          - name: 'CA_FT${i}_AZ'
+                            label: 'Axis Z'
+                            function: 'axisz'
+                          - name: 'CA_FT${i}_CT'
+                            label: "Thrust\nCoefficient"
+                          - name: 'CA_FT${i}_TRQ_R'
+                            label: 'Roll Scale'
+                          - name: 'CA_FT${i}_TRQ_P'
+                            label: 'Pitch Scale'
+                          - name: 'CA_FT${i}_TRQ_Y'
+                            label: 'Yaw Scale'

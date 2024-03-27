@@ -153,6 +153,10 @@ void ActuatorEffectivenessControlSurfaces::updateParams()
 
 bool ActuatorEffectivenessControlSurfaces::addActuators(Configuration &configuration)
 {
+	if (configuration.num_actuators[(int)ActuatorType::FT] > 0) {
+		PX4_ERR("Wrong actuator ordering: FT need to be after servos");
+		return false;
+	}
 	for (int i = 0; i < _count; i++) {
 		int actuator_idx = configuration.addActuator(ActuatorType::SERVOS, _params[i].torque, Vector3f{});
 

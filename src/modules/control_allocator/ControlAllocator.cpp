@@ -269,6 +269,9 @@ ControlAllocator::update_effectiveness_source()
 		case EffectivenessSource::HELICOPTER_COAXIAL:
 			tmp = new ActuatorEffectivenessHelicopterCoaxial(this);
 			break;
+		case EffectivenessSource::CUSTOM_6DOF:
+			tmp = new ActuatorEffectivenessCustom6DOF(this);
+			break;
 
 		default:
 			PX4_ERR("Unknown airframe");

@@ -39,6 +39,9 @@ functions:
     Landing_Gear_Wheel: 440
 
     # Add your own here:
+    FT:
+      start: 500
+      count: 8
     #MyCustomFunction: 10000
 
   pwm_fmu: # These only exist on FMU PWM pins

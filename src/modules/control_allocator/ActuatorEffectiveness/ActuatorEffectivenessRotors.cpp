@@ -129,8 +129,8 @@ void ActuatorEffectivenessRotors::updateParams()
 bool
 ActuatorEffectivenessRotors::addActuators(Configuration &configuration)
 {
-	if (configuration.num_actuators[(int)ActuatorType::SERVOS] > 0) {
-		PX4_ERR("Wrong actuator ordering: servos need to be after motors");
+	if (configuration.num_actuators[(int)ActuatorType::SERVOS] > 0 || configuration.num_actuators[(int)ActuatorType::FT] > 0) {
+		PX4_ERR("Wrong actuator ordering: servos and FT need to be after motors");
 		return false;
 	}
 

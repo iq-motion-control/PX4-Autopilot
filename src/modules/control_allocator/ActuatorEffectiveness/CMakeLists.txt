@@ -38,8 +38,12 @@ px4_add_library(ActuatorEffectiveness
 	ActuatorEffectivenessUUV.hpp
 	ActuatorEffectivenessControlSurfaces.cpp
 	ActuatorEffectivenessControlSurfaces.hpp
+	ActuatorEffectivenessForceTorque.cpp
+	ActuatorEffectivenessForceTorque.hpp
 	ActuatorEffectivenessCustom.cpp
 	ActuatorEffectivenessCustom.hpp
+	ActuatorEffectivenessCustom6DOF.cpp
+	ActuatorEffectivenessCustom6DOF.hpp
 	ActuatorEffectivenessFixedWing.cpp
 	ActuatorEffectivenessFixedWing.hpp
 	ActuatorEffectivenessHelicopter.cpp
