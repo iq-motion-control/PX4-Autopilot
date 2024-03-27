@@ -68,7 +68,7 @@ public:
 
 	const char *name() const override { return "Force Torques"; }
 
-	int count() const { return _count; }
+	int count() const { return _geometry.num_rotors; }
 
 	const FTGeometry &config(int idx) const { return _geometry.rotors[idx]; }
 
@@ -87,5 +87,4 @@ private:
 
 	Geometry _geometry{};
 
-	int _count{0};
 };

@@ -89,9 +89,9 @@ void ActuatorEffectivenessForceTorque::updateParams()
 		return;
 	}
 
-	_count = count;
+	_geometry.num_rotors = count;
 
-	for (int i = 0; i < _count; i++) {
+	for (int i = 0; i < _geometry.num_rotors; i++) {
 		Vector3f &torque_axis = _geometry.rotors[i].torque_axis;
 		Vector3f &position = _geometry.rotors[i].position;
 		Vector3f &axis = _geometry.rotors[i].axis;
