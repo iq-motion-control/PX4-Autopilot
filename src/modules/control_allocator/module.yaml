@@ -641,32 +641,44 @@ parameters:
             min: 0
             max: 100
             default: 6.5
-        CA_FT${i}_TRQ_R:
+        CA_FT${i}_TRQ_AX:
             description:
-                short: FT ${i} roll torque scaling
+                short: FT ${i} Torque X axis
             type: float
             decimal: 2
             num_instances: *max_num_ft
             instance_start: 0
             default: 0.0
 
-        CA_FT${i}_TRQ_P:
+        CA_FT${i}_TRQ_AY:
             description:
-                short: FT ${i} pitch torque scaling
+                short: FT ${i} Torque Y axis
             type: float
             decimal: 2
             num_instances: *max_num_ft
             instance_start: 0
             default: 0.0
 
-        CA_FT${i}_TRQ_Y:
+        CA_FT${i}_TRQ_AZ:
             description:
-                short: FT ${i} yaw torque scaling
+                short: FT ${i} Torque Z axis
             type: float
             decimal: 2
             num_instances: *max_num_ft
             instance_start: 0
             default: 0.0
+        CA_FT${i}_TRQ_CM:
+            description:
+                short: FT ${i} Torque Coeff
+                long: |
+                  The moment coefficient if defined as Torque = KM * Thrust.
+            type: float
+            decimal: 1
+            increment: 1
+            num_instances: *max_num_ft
+            min: 0
+            max: 100
+            default: 6.5
 
 
 # Mixer
@@ -1315,9 +1327,11 @@ mixer:
                             function: 'axisz'
                           - name: 'CA_FT${i}_CT'
                             label: "Thrust\nCoefficient"
-                          - name: 'CA_FT${i}_TRQ_R'
-                            label: 'Roll Scale'
-                          - name: 'CA_FT${i}_TRQ_P'
-                            label: 'Pitch Scale'
-                          - name: 'CA_FT${i}_TRQ_Y'
-                            label: 'Yaw Scale'
+                          - name: 'CA_FT${i}_TRQ_AX'
+                            label: 'T Axis X'
+                          - name: 'CA_FT${i}_TRQ_AY'
+                            label: 'T Axis Y'
+                          - name: 'CA_FT${i}_TRQ_AZ'
+                            label: 'T Axis Z'
+                          - name: 'CA_FT${i}_TRQ_CM'
+                            label: 'T coeff'

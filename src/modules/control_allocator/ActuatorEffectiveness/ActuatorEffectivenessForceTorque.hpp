@@ -50,6 +50,7 @@ public:
 		matrix::Vector3f position;
 		matrix::Vector3f axis;
 		float thrust_coef;
+		float torque_coef;
 	};
 
 	struct Geometry {
@@ -79,6 +80,7 @@ private:
 		param_t position[3];
 		param_t axis[3];
 		param_t thrust_coef;
+		param_t torque_coef;
 	};
 	ParamHandles _param_handles[NUM_FT_MAX];
 	param_t _count_handle;
