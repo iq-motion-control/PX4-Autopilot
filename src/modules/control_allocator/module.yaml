@@ -667,7 +667,7 @@ parameters:
             num_instances: *max_num_ft
             instance_start: 0
             default: 0.0
-        CA_FT${i}_TRQ_CM:
+        CA_FT${i}_CM:
             description:
                 short: FT ${i} Torque Coeff
                 long: |
@@ -1333,5 +1333,5 @@ mixer:
                             label: 'T Axis Y'
                           - name: 'CA_FT${i}_TRQ_AZ'
                             label: 'T Axis Z'
-                          - name: 'CA_FT${i}_TRQ_CM'
+                          - name: 'CA_FT${i}_CM'
                             label: 'T coeff'
