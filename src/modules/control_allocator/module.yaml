@@ -1302,7 +1302,7 @@ mixer:
                     item_label_prefix: 'Torque Force ${i}'
                     per_item_parameters:
                         standard:
-                            position: [ 'CA_ROTOR${i}_PX', 'CA_ROTOR${i}_PY', 'CA_ROTOR${i}_PZ' ]
+                            position: [ 'CA_FT${i}_PX', 'CA_FT${i}_PY', 'CA_FT${i}_PZ' ]
                         extra:
                           - name: 'CA_FT${i}_AX'
                             label: 'Axis X'
