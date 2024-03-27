@@ -49,7 +49,7 @@ public:
 			    ActuatorVector &actuator_sp, const matrix::Vector<float, NUM_ACTUATORS> &actuator_min,
 			    const matrix::Vector<float, NUM_ACTUATORS> &actuator_max) override;
 
-	const char *name() const override { return "Custom"; }
+	const char *name() const override { return "Custom6DOF"; }
 
 protected:
 	ActuatorEffectivenessRotors _motors;
