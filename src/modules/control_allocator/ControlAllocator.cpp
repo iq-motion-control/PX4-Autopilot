@@ -187,6 +187,9 @@ ControlAllocator::update_allocation_method(bool force)
 				_control_allocation[i] = new ControlAllocationSequentialDesaturation();
 				break;
 
+			case AllocationMethod::NO_INVERSE:
+				_control_allocation[i] = new ControlAllocationNoInverse();
+				break;
 			default:
 				PX4_ERR("Unknown allocation method");
 				break;
@@ -268,6 +271,10 @@ ControlAllocator::update_effectiveness_source()
 
 		case EffectivenessSource::HELICOPTER_COAXIAL:
 			tmp = new ActuatorEffectivenessHelicopterCoaxial(this);
+			break;
+
+		case EffectivenessSource::CUSTOM_DIRECT:
+			tmp = new ActuatorEffectivenessCustomDirect(this);
 			break;
 
 		default:
@@ -807,6 +814,10 @@ int ControlAllocator::print_status()
 
 	case AllocationMethod::AUTO:
 		PX4_INFO("Method: Auto");
+		break;
+
+	case AllocationMethod::NO_INVERSE:
+		PX4_INFO("Method: No Inverse");
 		break;
 	}
 

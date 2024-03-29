@@ -1,6 +1,8 @@
 __max_num_mc_motors: &max_num_mc_motors 12
 __max_num_servos: &max_num_servos 8
 __max_num_tilts: &max_num_tilts 4
+__max_num_direct_m: &max_num_direct_m 8
+__max_num_direct_s: &max_num_direct_s 8
 
 module_name: Control Allocation
 
@@ -30,6 +32,7 @@ parameters:
                 10: Helicopter (tail ESC)
                 11: Helicopter (tail Servo)
                 12: Helicopter (Coaxial)
+                14: Custom Direct Actuation
             default: 0
 
         CA_METHOD:
@@ -540,6 +543,145 @@ parameters:
                 0: Ignore
                 1: Remove first failed motor from effectiveness
             default: 0
+
+        # Direct
+        CA_DR_M_COUNT:
+            description:
+                short: Total number of Direct Motor Actuators
+            type: enum
+            values:
+                0: '0'
+                1: '1'
+                2: '2'
+                3: '3'
+                4: '4'
+                5: '5'
+                6: '6'
+                7: '7'
+            default: 0
+        # CA_DR_M${i}_TYPE:
+        #     description:
+        #         short: Direct Actuator ${i} type
+        #     type: enum
+        #     values:
+        #         0: Motor
+        #         1: Servo
+        #     num_instances: *max_num_direct_m
+        #     instance_start: 0
+        #     default: 0
+        CA_DR_M${i}_TRQ_X:
+            description:
+                short: Direct Motor Actuator ${i} X (Roll) Torque Scale
+            type: float
+            decimal: 4
+            num_instances: *max_num_direct_m
+            instance_start: 0
+            default: 0.0
+        CA_DR_M${i}_TRQ_Y:
+            description:
+                short: Direct Motor Actuator ${i} Y (Pitch) Torque Scale
+            type: float
+            decimal: 4
+            num_instances: *max_num_direct_m
+            instance_start: 0
+            default: 0.0
+        CA_DR_M${i}_TRQ_Z:
+            description:
+                short: Direct Motor Actuator ${i} Z (Yaw) Torque Scale
+            type: float
+            decimal: 4
+            num_instances: *max_num_direct_m
+            instance_start: 0
+            default: 0.0
+        CA_DR_M${i}_FRC_X:
+            description:
+                short: Direct Motor Actuator ${i} X (Forward) Force Scale
+            type: float
+            decimal: 4
+            num_instances: *max_num_direct_m
+            instance_start: 0
+            default: 0.0
+        CA_DR_M${i}_FRC_Y:
+            description:
+                short: Direct Motor Actuator ${i} Y (Right) Force Scale
+            type: float
+            decimal: 4
+            num_instances: *max_num_direct_m
+            instance_start: 0
+            default: 0.0
+        CA_DR_M${i}_FRC_Z:
+            description:
+                short: Direct Motor Actuator ${i} Z (Down) Force Scale
+            type: float
+            decimal: 4
+            num_instances: *max_num_direct_m
+            instance_start: 0
+            default: 0.0
+
+        # CA_DR_S_COUNT:
+        #     description:
+        #         short: Total number of Direct Motor Actuators
+        #     type: enum
+        #     values:
+        #         0: '0'
+        #         1: '1'
+        #         2: '2'
+        #         3: '3'
+        #         4: '4'
+        #         5: '5'
+        #         6: '6'
+        #         7: '7'
+        #     default: 0
+
+        # CA_DR_S${i}_TRQ_X:
+        #     description:
+        #         short: Direct Servo Actuator ${i} X (Roll) Torque Scale
+        #     type: float
+        #     decimal: 4
+        #     num_instances: *max_num_direct_s
+        #     instance_start: 0
+        #     default: 0.0
+        # CA_DR_S${i}_TRQ_Y:
+        #     description:
+        #         short: Direct Servo Actuator ${i} Y (Pitch) Torque Scale
+        #     type: float
+        #     decimal: 4
+        #     num_instances: *max_num_direct_s
+        #     instance_start: 0
+        #     default: 0.0
+        # CA_DR_S${i}_TRQ_Z:
+        #     description:
+        #         short: Direct Servo Actuator ${i} Z (Yaw) Torque Scale
+        #     type: float
+        #     decimal: 4
+        #     num_instances: *max_num_direct_s
+        #     instance_start: 0
+        #     default: 0.0
+        # CA_DR_S${i}_FRC_X:
+        #     description:
+        #         short: Direct Servo Actuator ${i} X (Forward) Force Scale
+        #     type: float
+        #     decimal: 4
+        #     num_instances: *max_num_direct_s
+        #     instance_start: 0
+        #     default: 0.0
+        # CA_DR_S${i}_FRC_Y:
+        #     description:
+        #         short: Direct Servo Actuator ${i} Y (Right) Force Scale
+        #     type: float
+        #     decimal: 4
+        #     num_instances: *max_num_direct_s
+        #     instance_start: 0
+        #     default: 0.0
+        # CA_DR_S${i}_FRC_Z:
+        #     description:
+        #         short: Direct Motor Actuator ${i} Z (Down) Force Scale
+        #     type: float
+        #     decimal: 4
+        #     num_instances: *max_num_direct_s
+        #     instance_start: 0
+        #     default: 0.0
+
 
 # Mixer
 mixer:
@@ -1140,3 +1282,23 @@ mixer:
                     parameters:
                       - label: 'Throttle spoolup time'
                         name: COM_SPOOLUP_TIME
+            14: # Custom Direct
+                actuators:
+                  - actuator_type: 'motor'
+                    group_label: 'Direct Actuators'
+                    count: 'CA_DR_M_COUNT'
+                    item_label_prefix: 'Direct ${i}'
+                    per_item_parameters:
+                        extra:
+                          - name: 'CA_DR_M${i}_TRQ_X'
+                            label: 'X Torque Scale'
+                          - name: 'CA_DR_M${i}_TRQ_Y'
+                            label: 'Y Torque Scale'
+                          - name: 'CA_DR_M${i}_TRQ_Z'
+                            label: 'Z Torque Scale'
+                          - name: 'CA_DR_M${i}_FRC_X'
+                            label: 'X Force Scale'
+                          - name: 'CA_DR_M${i}_FRC_Y'
+                            label: 'Y Force Scale'
+                          - name: 'CA_DR_M${i}_FRC_Z'
+                            label: 'Z Force Scale'
