@@ -159,14 +159,7 @@ ControlAllocationNoInverse::allocate()
 {
 	if (_mix_update_needed) {
 		_mix = _effectiveness.transpose();
-		// matrix::geninv(_effectiveness, _mix);
 
-		if (_normalization_needs_update && !_had_actuator_failure) {
-			updateControlAllocationMatrixScale();
-			_normalization_needs_update = false;
-		}
-
-		normalizeControlAllocationMatrix();
 		_mix_update_needed = false;
 		PX4_INFO("Effectiveness");
 		for (int ii = 0; ii < NUM_AXES; ++ii)
@@ -189,7 +182,7 @@ ControlAllocationNoInverse::allocate()
 			double(_effectiveness(ii,14)),
 			double(_effectiveness(ii,15)));
 		}
-		PX4_INFO("Inverted");
+		PX4_INFO("Transposed");
 		for (int ii = 0; ii < NUM_ACTUATORS; ++ii)
 		{
 			PX4_INFO("%f\t%f\t%f\t%f\t%f\t%f",
