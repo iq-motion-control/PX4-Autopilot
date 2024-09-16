@@ -49,8 +49,6 @@ void VertiqTelemetryManager::Init(uint64_t telem_bitmask, uint8_t module_id)
 		_telem_interface[ii] = new IQUartFlightControllerInterfaceClient(_module_ids_in_use[ii]);
 		_client_manager->AddNewClient(_telem_interface[ii]);
 	}
-	// _telem_interface = new IQUartFlightControllerInterfaceClient(module_id);
-	// _client_manager->AddNewClient(_telem_interface);
 }
 
 void VertiqTelemetryManager::FindTelemetryModuleIds()
@@ -150,12 +148,6 @@ uint16_t VertiqTelemetryManager::UpdateTelemetry()
 		_time_of_last_telem_request = hrt_absolute_time();
 
 		uint16_t next_telem = FindNextMotorForTelemetry();
-
-		// if (next_telem != _impossible_module_id) {
-		// 	//We need to update the module ID we're going to listen to. So, kill the old one, and make it anew.
-		// 	delete _telem_interface;
-		// 	_telem_interface = new IQUartFlightControllerInterfaceClient(next_telem);
-		// }
 
 		//update the telem target
 		return next_telem;
