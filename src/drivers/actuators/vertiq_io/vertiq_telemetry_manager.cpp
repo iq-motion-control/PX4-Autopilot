@@ -44,9 +44,13 @@ void VertiqTelemetryManager::Init(uint64_t telem_bitmask, uint8_t module_id)
 	//On init, make sure to set our bitmask, and then go ahead and find the front and back 1s
 	_telem_bitmask = telem_bitmask;
 	FindTelemetryModuleIds();
-
-	_telem_interface = new IQUartFlightControllerInterfaceClient(module_id);
-	_client_manager->AddNewClient(_telem_interface);
+	for (uint8_t ii = 0; ii < _number_of_module_ids_for_telem; ++ii)
+	{
+		_telem_interface[ii] = new IQUartFlightControllerInterfaceClient(_module_ids_in_use[ii]);
+		_client_manager->AddNewClient(_telem_interface[ii]);
+	}
+	// _telem_interface = new IQUartFlightControllerInterfaceClient(module_id);
+	// _client_manager->AddNewClient(_telem_interface);
 }
 
 void VertiqTelemetryManager::FindTelemetryModuleIds()
@@ -106,9 +110,9 @@ uint16_t VertiqTelemetryManager::UpdateTelemetry()
 	bool timed_out = (time_now - _time_of_last_telem_request) > _telem_timeout;
 
 	//We got a telemetry response
-	if (_telem_interface->telemetry_.IsFresh()) {
+	if (_telem_interface[_current_module_id_target_index]->telemetry_.IsFresh()) {
 		//grab the data
-		IFCITelemetryData telem_response = _telem_interface->telemetry_.get_reply();
+		IFCITelemetryData telem_response = _telem_interface[_current_module_id_target_index]->telemetry_.get_reply();
 
 		// also update our internal report for logging
 		_esc_status.esc[_current_module_id_target_index].esc_address  = _module_ids_in_use[_number_of_module_ids_for_telem];
@@ -147,11 +151,11 @@ uint16_t VertiqTelemetryManager::UpdateTelemetry()
 
 		uint16_t next_telem = FindNextMotorForTelemetry();
 
-		if (next_telem != _impossible_module_id) {
-			//We need to update the module ID we're going to listen to. So, kill the old one, and make it anew.
-			delete _telem_interface;
-			_telem_interface = new IQUartFlightControllerInterfaceClient(next_telem);
-		}
+		// if (next_telem != _impossible_module_id) {
+		// 	//We need to update the module ID we're going to listen to. So, kill the old one, and make it anew.
+		// 	delete _telem_interface;
+		// 	_telem_interface = new IQUartFlightControllerInterfaceClient(next_telem);
+		// }
 
 		//update the telem target
 		return next_telem;
