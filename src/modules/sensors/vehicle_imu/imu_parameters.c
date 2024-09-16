@@ -72,3 +72,48 @@ PARAM_DEFINE_INT32(SENS_IMU_AUTOCAL, 1);
  * @group Sensors
  */
 PARAM_DEFINE_INT32(SENS_IMU_CLPNOTI, 1);
+
+/**
+* IMU dynamic notch filtering
+*
+* Enable bank of dynamically updating notch filters.
+* Requires ESC RPM feedback.
+* @group Sensors
+* @min 0
+* @max 1
+* @bit 0 ESC RPM
+*/
+PARAM_DEFINE_INT32(IMU_ACCL_DNF_EN, 0);
+
+/**
+* IMU accl ESC notch filter bandwidth
+*
+* Bandwidth per notch filter when using dynamic notch filtering with ESC RPM.
+*
+* @group Sensors
+* @unit Hz
+* @min 5
+* @max 50
+*/
+PARAM_DEFINE_FLOAT(IMU_ACCL_DNF_BW, 15.f);
+
+/**
+* IMU accl dynamic notch filter harmonics
+*
+* ESC RPM number of harmonics (multiples of RPM) for ESC RPM dynamic notch filtering.
+*
+* @group Sensors
+* @min 1
+* @max 7
+*/
+PARAM_DEFINE_INT32(IMU_ACCL_DNF_HMC, 1);
+
+/**
+* IMU accl dynamic notch filter minimum frequency
+*
+* Minimum notch filter frequency in Hz.
+*
+* @group Sensors
+* @unit Hz
+*/
+PARAM_DEFINE_FLOAT(IMU_ACCL_DNF_MIN, 25.f);

@@ -201,7 +201,11 @@ private:
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::IMU_INTEG_RATE>) _param_imu_integ_rate,
 		(ParamBool<px4::params::SENS_IMU_AUTOCAL>) _param_sens_imu_autocal,
-		(ParamBool<px4::params::SENS_IMU_CLPNOTI>) _param_sens_imu_notify_clipping
+		(ParamBool<px4::params::SENS_IMU_CLPNOTI>) _param_sens_imu_notify_clipping,
+		(ParamInt<px4::params::IMU_ACCL_DNF_EN>) _param_imu_accl_dnf_en,
+		(ParamInt<px4::params::IMU_ACCL_DNF_HMC>) _param_imu_accl_dnf_hmc,
+		(ParamFloat<px4::params::IMU_ACCL_DNF_BW>) _param_imu_accl_dnf_bw,
+		(ParamFloat<px4::params::IMU_ACCL_DNF_MIN>) _param_imu_accl_dnf_min
 	)
 };
 
