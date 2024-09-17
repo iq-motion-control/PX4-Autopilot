@@ -35,10 +35,12 @@
 
 #include <Integrator.hpp>
 
+#include <containers/Bitset.hpp>
 #include <lib/mathlib/math/Limits.hpp>
 #include <lib/mathlib/math/WelfordMean.hpp>
 #include <lib/mathlib/math/WelfordMeanVector.hpp>
 #include <lib/matrix/matrix/math.hpp>
+#include <lib/mathlib/math/filter/NotchFilter.hpp>
 #include <lib/perf/perf_counter.h>
 #include <lib/sensor_calibration/Accelerometer.hpp>
 #include <lib/sensor_calibration/Gyroscope.hpp>
@@ -57,6 +59,7 @@
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_imu.h>
 #include <uORB/topics/vehicle_imu_status.h>
+#include <uORB/topics/esc_status.h>
 
 using namespace time_literals;
 
@@ -194,6 +197,27 @@ private:
 	static constexpr hrt_abstime INFLIGHT_CALIBRATION_QUIET_PERIOD_US{30_s};
 
 	hrt_abstime _in_flight_calibration_check_timestamp_last{0};
+
+	// ESC RPM Filter stuff
+	float _filter_sample_rate{NAN};
+
+	matrix::Vector3f UpdateAndFilterDynamicNotch(const matrix::Vector3f &raw_data, const float dt);
+	void DisableDynamicNotchEscRpm();
+	uORB::Subscription _esc_status_sub {ORB_ID(esc_status)};
+	static constexpr hrt_abstime DYNAMIC_NOTCH_FILTER_TIMEOUT = 3_s;
+	static constexpr int MAX_NUM_ESCS = sizeof(esc_status_s::esc) / sizeof(esc_status_s::esc[0]);
+
+	using NotchFilterHarmonic = math::NotchFilter<float>[3][MAX_NUM_ESCS];
+	NotchFilterHarmonic *_dynamic_notch_filter_esc_rpm{nullptr};
+
+	int _esc_rpm_harmonics{0};
+	px4::Bitset<MAX_NUM_ESCS> _esc_available{};
+	hrt_abstime _last_esc_rpm_notch_update[MAX_NUM_ESCS] {};
+
+	perf_counter_t _dynamic_notch_filter_esc_rpm_disable_perf{nullptr};
+	perf_counter_t _dynamic_notch_filter_esc_rpm_init_perf{nullptr};
+	perf_counter_t _dynamic_notch_filter_esc_rpm_update_perf{nullptr};
+	// end notch filter stuff
 
 	perf_counter_t _accel_generation_gap_perf{perf_alloc(PC_COUNT, MODULE_NAME": accel data gap")};
 	perf_counter_t _gyro_generation_gap_perf{perf_alloc(PC_COUNT, MODULE_NAME": gyro data gap")};
