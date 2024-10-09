@@ -525,7 +525,7 @@ Vector3f VehicleIMU::UpdateAndFilterDynamicNotch(const matrix::Vector3f &raw_dat
 								const bool allow_update = !axis_init[axis] || (nf.initialized() && notch_freq_delta < nf.getBandwidth());
 								if ((!_esc_available[esc] || notch_freq_changed) && allow_update)
 								{
-									PX4_INFO("e:%i, a:%i, h:%i\ts: %5.2f\tf: %5.2f\tbw: %5.2f", esc, axis, harmonic, double(_filter_sample_rate), double(frequency_hz), double(bandwidth_hz));
+									// PX4_INFO("e:%i, a:%i, h:%i\ts: %5.2f\tf: %5.2f\tbw: %5.2f", esc, axis, harmonic, double(_filter_sample_rate), double(frequency_hz), double(bandwidth_hz));
 
 									if (nf.setParameters(_filter_sample_rate, frequency_hz, bandwidth_hz))
 									{
