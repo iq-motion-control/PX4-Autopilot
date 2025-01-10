@@ -45,6 +45,8 @@ void VertiqConfigurationHandler::InitConfigurationClients(uint8_t object_id)
 
 	_prop_input_parser_client = new EscPropellerInputParserClient(object_id);
 	_client_manager->AddNewClient(_prop_input_parser_client);
+	_prop_motor_control_client = new PropellerMotorControlClient(object_id);
+	_client_manager->AddNewClient(_prop_motor_control_client);
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
 	_ifci_client = new IQUartFlightControllerInterfaceClient(object_id);
@@ -68,6 +70,8 @@ void VertiqConfigurationHandler::InitClientEntryWrappers()
 	AddNewClientEntry<uint8_t, int32_t>(param_find("VTQ_MOTOR_DIR"), &(_prop_input_parser_client->sign_));
 	AddNewClientEntry<uint8_t, int32_t>(param_find("VTQ_FC_DIR"), &(_prop_input_parser_client->flip_negative_));
 
+	AddNewClientEntry<float, float>(param_find("VTQ_TIMEOUT"), &(_prop_motor_control_client->timeout_));
+
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
 	AddNewClientEntry<uint8_t, int32_t>(param_find("VTQ_THROTTLE_CVI"), &(_ifci_client->throttle_cvi_));
 #endif //CONFIG_USE_IFCI_CONFIGURATION
@@ -84,6 +88,10 @@ void VertiqConfigurationHandler::InitClientEntryWrappers()
 					&(_voltage_superposition_client->propeller_torque_offset_angle_));
 	AddNewClientEntry<float, float>(param_find("VTQ_PULSE_V_LIM"),
 					&(_pulsing_rectangular_input_parser_client->pulsing_voltage_limit_));
+	AddNewClientEntry<float, float>(param_find("VTQ_PHASE_LEAD"),
+					&(_voltage_superposition_client->phase_lead_time_));
+	AddNewClientEntry<float, float>(param_find("VTQ_PLS_COEFF_0"),
+					&(_voltage_superposition_client->poly_limit_zero_));
 #endif //CONFIG_USE_PULSING_CONFIGURATION
 }
 
@@ -92,6 +100,7 @@ void VertiqConfigurationHandler::UpdateClientsToNewObjId(uint8_t new_object_id)
 	_object_id_now = new_object_id;
 
 	DestroyAndRecreateClient<EscPropellerInputParserClient>(_prop_input_parser_client, new_object_id);
+	DestroyAndRecreateClient<PropellerMotorControlClient>(_prop_motor_control_client, new_object_id);
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
 	DestroyAndRecreateClient<IQUartFlightControllerInterfaceClient>(_ifci_client, new_object_id);

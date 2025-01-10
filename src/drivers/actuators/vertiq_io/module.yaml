@@ -206,6 +206,31 @@ parameters:
             min: 0
             max: 255
             default: 0
+        VTQ_PHASE_LEAD:
+            description:
+                short: Module Param - The pulsing phase lead time
+                long: |
+            type: float
+            min: -1
+            max: 1
+            default: 0
+        VTQ_PLS_COEFF_0:
+            description:
+                short: Module Param - The pulsing coeff 0
+                long: |
+            type: float
+            min: -1000
+            max: 1000
+            default: 0
+        VTQ_TIMEOUT:
+            description:
+                short: Module Param - Timeout between control signals to disarm
+                long: |
+                    This represents the number of seconds between control signals before the motor will assume that connection has been lost and attempt to slow itself to a stop.
+            type: float
+            min: 0
+            max: 1000
+            default: 0
         VTQ_TELEM_IDS_1:
             description:
                 short: Module IDs [0, 31] that you would like to request telemetry from

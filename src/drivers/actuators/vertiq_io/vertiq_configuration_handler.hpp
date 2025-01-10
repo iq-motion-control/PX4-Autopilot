@@ -46,6 +46,7 @@
 #include "entry_wrapper.hpp"
 #include "vertiq_client_manager.hpp"
 #include "iq-module-communication-cpp/inc/esc_propeller_input_parser_client.hpp"
+#include "iq-module-communication-cpp/inc/propeller_motor_control_client.hpp"
 
 #include "iq-module-communication-cpp/inc/arming_handler_client.hpp"
 #include "iq-module-communication-cpp/inc/iquart_flight_controller_interface_client.hpp"
@@ -158,6 +159,7 @@ private:
 //Vertiq Client information
 	//Known Configuration Clients can be created as pointers to certain types of clients
 	EscPropellerInputParserClient *_prop_input_parser_client;
+	PropellerMotorControlClient *_prop_motor_control_client;
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION
 	//Make all of the clients that we need to talk to the IFCI config params
