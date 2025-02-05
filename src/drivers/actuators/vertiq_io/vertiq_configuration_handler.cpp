@@ -69,7 +69,12 @@ void VertiqConfigurationHandler::InitClientEntryWrappers()
 	AddNewClientEntry<uint8_t, int32_t>(param_find("VTQ_CONTROL_MODE"), &(_prop_input_parser_client->mode_));
 	AddNewClientEntry<uint8_t, int32_t>(param_find("VTQ_MOTOR_DIR"), &(_prop_input_parser_client->sign_));
 	AddNewClientEntry<uint8_t, int32_t>(param_find("VTQ_FC_DIR"), &(_prop_input_parser_client->flip_negative_));
-
+	AddNewClientEntry<float, float>(param_find("VTQ_VEL_P"), &(_prop_motor_control_client->velocity_kp_));
+	AddNewClientEntry<float, float>(param_find("VTQ_VEL_I"), &(_prop_motor_control_client->velocity_ki_));
+	AddNewClientEntry<float, float>(param_find("VTQ_VEL_D"), &(_prop_motor_control_client->velocity_kd_));
+	AddNewClientEntry<float, float>(param_find("VTQ_VEL_FF0"), &(_prop_motor_control_client->velocity_ff0_));
+	AddNewClientEntry<float, float>(param_find("VTQ_VEL_FF1"), &(_prop_motor_control_client->velocity_ff1_));
+	AddNewClientEntry<float, float>(param_find("VTQ_VEL_FF2"), &(_prop_motor_control_client->velocity_ff2_));
 	AddNewClientEntry<float, float>(param_find("VTQ_TIMEOUT"), &(_prop_motor_control_client->timeout_));
 
 #ifdef CONFIG_USE_IFCI_CONFIGURATION

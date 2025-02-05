@@ -231,6 +231,60 @@ parameters:
             min: 0
             max: 1000
             default: 0
+        VTQ_VEL_P:
+            description:
+                short: Module Param - Speed Control P
+                long: |
+                    This represents the P gain for the velocity controller.
+            type: float
+            min: 0
+            max: 1000
+            default: 0
+        VTQ_VEL_I:
+            description:
+                short: Module Param - Speed Control I
+                long: |
+                    This represents the I gain for the velocity controller.
+            type: float
+            min: 0
+            max: 1000
+            default: 0
+        VTQ_VEL_D:
+            description:
+                short: Module Param - Speed Control D
+                long: |
+                    This represents the D gain for the velocity controller.
+            type: float
+            min: 0
+            max: 1000
+            default: 0
+        VTQ_VEL_FF0:
+            description:
+                short: Module Param - Speed Control FF0
+                long: |
+                    This represents the FF0 gain for the velocity controller.
+            type: float
+            min: 0
+            max: 1000
+            default: 0
+        VTQ_VEL_FF1:
+            description:
+                short: Module Param - Speed Control FF1
+                long: |
+                    This represents the FF1 gain for the velocity controller.
+            type: float
+            min: 0
+            max: 1000
+            default: 0
+        VTQ_VEL_FF2:
+            description:
+                short: Module Param - Speed Control FF2
+                long: |
+                    This represents the FF2 gain for the velocity controller.
+            type: float
+            min: 0
+            max: 1000
+            default: 0
         VTQ_TELEM_IDS_1:
             description:
                 short: Module IDs [0, 31] that you would like to request telemetry from
